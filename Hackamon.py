@@ -16,10 +16,10 @@ splash.append(bg_sprite)
 tile_width = 32
 tile_height = 32
 
-hackamon_sheet = displayio.OnDiskBitmap("Hackamon-1-Idle-Spritesheet.bmp")
+hackamon_sheet_idle = displayio.OnDiskBitmap("Hackamon-1-Idle-Spritesheet.bmp")
 
-hackamon_sprite = displayio.TileGrid(hackamon_sheet,
-                                     pixel_shader=hackamon_sheet.pixel_shader,
+hackamon_sprite_idle = displayio.TileGrid(hackamon_sheet_idle,
+                                     pixel_shader=hackamon_sheet_idle.pixel_shader,
                                      width=1,
                                      height=1,
                                      tile_width=tile_width,
@@ -28,12 +28,35 @@ hackamon_sprite = displayio.TileGrid(hackamon_sheet,
                                      x=(display.width - tile_width) // 2,
                                      y=display.height - tile_height - 40)
 
-splash.append(hackamon_sprite)
+splash.append(hackamon_sprite_idle)
+
+hackamon_sheet_jump = displayio.OnDiskBitmap("Hackamon-1-Jump-Spritesheet.bmp")
+
+hackamon_sprite_jump = displayio.TileGrid(hackamon_sheet_jump,
+                                        pixel_shader=hackamon_sheet_jump.pixel_shader,
+                                        width=1,
+                                        height=1,
+                                        tile_width=tile_width,
+                                        tile_height=tile_height,
+                                        default_tile=0,
+                                        x=(display.width - tile_width) // 2,
+                                        y=display.height - tile_height - 40)
 
 frame = 0
 speed = 4
 game_over = False
+isJumping = False
 
+def run_jump_animation():
+   global frame, isJumping
+
+   for jump_frame in range(hackamon_sheet_jump.width // tile_width):
+       hackamon_sprite_jump[0] = jump_frame
+       time.sleep(0.1)
+
+   splash.remove(hackamon_sprite_jump)
+   splash.append(hackamon_sprite_idle)
+   isJumping = False
 
 
 while True:
@@ -50,26 +73,37 @@ while True:
 
     if game_over == False:
         if keys[pygame.K_LEFT]:
-            if hackamon_sprite.x > 24:
-                hackamon_sprite.x -= speed
+            if hackamon_sprite_idle.x > 24:
+                hackamon_sprite_idle.x -= speed
+                hackamon_sprite_jump.x -= speed
         if keys[pygame.K_RIGHT]:
-            if hackamon_sprite.x < 78:
-                hackamon_sprite.x += speed
+            if hackamon_sprite_idle.x < 78:
+                hackamon_sprite_idle.x += speed
+                hackamon_sprite_jump.x += speed
 
         # For testing! I know there will be only 3 buttons :)
         if keys[pygame.K_UP]:
-            if hackamon_sprite.y > 64 - 20:
-                hackamon_sprite.y -= speed
+            if hackamon_sprite_idle.y > 64 - 20:
+                hackamon_sprite_idle.y -= speed
+                
         if keys[pygame.K_DOWN]:
-            if hackamon_sprite.y < 92 - tile_height:
-                hackamon_sprite.y += speed
+            if hackamon_sprite_idle.y < 92 - tile_height:
+                hackamon_sprite_idle.y += speed
+                hackamon_sprite_jump.y += speed
+        
+        if keys[pygame.K_SPACE] and not isJumping:
+            isJumping = True
+            splash.remove(hackamon_sprite_idle)
+            splash.append(hackamon_sprite_jump)
+            frame = 0
+            run_jump_animation()
 
 
 
 
 
 
-    hackamon_sprite[0] = frame
-    frame = (frame + 1) % (hackamon_sheet.width // tile_width)
+    hackamon_sprite_idle[0] = frame
+    frame = (frame + 1) % (hackamon_sheet_idle.width // tile_width)
 
     time.sleep(0.1)
