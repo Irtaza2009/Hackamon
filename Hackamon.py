@@ -11,8 +11,10 @@ splash = displayio.Group()
 display.show(splash)
 
 desk_background = displayio.OnDiskBitmap("Desk-BG.bmp")
-bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
-splash.append(bg_sprite)
+desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
+station_background = displayio.OnDiskBitmap("Station-BG.bmp")
+station_bg_sprite = displayio.TileGrid(station_background, pixel_shader=station_background.pixel_shader)
+splash.append(desk_bg_sprite)
 
 tile_width = 32
 tile_height = 32
@@ -136,6 +138,7 @@ def check_button_press():
         print("Button Pressed!")
         time.sleep(0.5)
         gameState = "MiniGame"
+        mini_game()
 
 def manage_stats():
     global happiness, battery, game_over
@@ -150,6 +153,19 @@ def manage_stats():
         print("Battery: " + str(battery))
         battery_bar_sprite[0] = 4 - math.ceil(battery // 1000)
         
+def mini_game():
+    global gameState
+    # remove all from splash
+    splash.remove(hackamon_sprite_idle)
+    splash.remove(button_sprite)
+    splash.remove(happiness_bar_sprite)
+    splash.remove(battery_bar_sprite)
+    # add station background and sprites back
+    splash.append(station_bg_sprite)
+    splash.append(hackamon_sprite_idle)
+    splash.append(happiness_bar_sprite)
+    splash.append(battery_bar_sprite)
+    
     
 
 
@@ -168,7 +184,7 @@ while True:
 
     if game_over == False:
         if keys[pygame.K_LEFT]:
-            if hackamon_sprite_idle.x > 24:
+            if (gameState == "Main" and hackamon_sprite_idle.x > 24) or (gameState == "MiniGame" and hackamon_sprite_idle.x > 0):
                 facing_left = True
                 hackamon_sprite_idle.x -= speed
                 hackamon_sprite_jump.x -= speed
@@ -176,7 +192,7 @@ while True:
                 hackamon_sprite_jump.flip_x = False
 
         if keys[pygame.K_RIGHT]:
-            if hackamon_sprite_idle.x < 78:
+            if (gameState == "Main" and hackamon_sprite_idle.x < 78) or (gameState == "MiniGame" and hackamon_sprite_idle.x < 128 - tile_width):
                 facing_left = False
                 hackamon_sprite_idle.x += speed
                 hackamon_sprite_jump.x += speed
@@ -185,12 +201,12 @@ while True:
 
         # For testing! I know there will be only 3 buttons :)
         if keys[pygame.K_UP]:
-            if hackamon_sprite_idle.y > 64 - 20:
+            if (gameState == "Main" and hackamon_sprite_idle.y > 64 - 20) or (gameState == "MiniGame" and hackamon_sprite_idle.y > 96 - 20):
                 hackamon_sprite_idle.y -= speed
                 hackamon_sprite_jump.y -= speed
                 
         if keys[pygame.K_DOWN]:
-            if hackamon_sprite_idle.y < 92 - tile_height:
+            if (gameState == "Main" and hackamon_sprite_idle.y < 92 - tile_height) or (gameState == "MiniGame" and hackamon_sprite_idle.y < 128 - tile_height):
                 hackamon_sprite_idle.y += speed
                 hackamon_sprite_jump.y += speed
         
