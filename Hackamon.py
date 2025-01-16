@@ -1,8 +1,11 @@
 import displayio
 from blinka_displayio_pygamedisplay import PyGameDisplay
+from adafruit_display_text import label
+from adafruit_bitmap_font import bitmap_font
 import pygame
 import time
 import math
+import random
 
 pygame.init()
 
@@ -14,10 +17,15 @@ desk_background = displayio.OnDiskBitmap("Desk-BG.bmp")
 desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
 station_background = displayio.OnDiskBitmap("Station-BG.bmp")
 station_bg_sprite = displayio.TileGrid(station_background, pixel_shader=station_background.pixel_shader)
+breakout_background = displayio.OnDiskBitmap("Breakout-BG.bmp")
+breakout_bg_sprite = displayio.TileGrid(breakout_background, pixel_shader=breakout_background.pixel_shader)
 splash.append(desk_bg_sprite)
 
 tile_width = 32
 tile_height = 32
+
+brick_height = 8
+brick_width = 16
 
 hackamon_sheet_idle = displayio.OnDiskBitmap("Hackamon-1-Idle-Spritesheet.bmp")
 hackamon_sprite_idle = displayio.TileGrid(hackamon_sheet_idle,
@@ -53,16 +61,40 @@ hackamon_sprite_charging = displayio.TileGrid(hackamon_sheet_charging,
                                         x=85,
                                         y=70)
 
-button_sheet = displayio.OnDiskBitmap("Button-1-Spritesheet.bmp")
+button_1_sheet = displayio.OnDiskBitmap("Button-1-Spritesheet.bmp")
 
-button_sprite = displayio.TileGrid(button_sheet,
-                                    pixel_shader=button_sheet.pixel_shader,
+button_1_sprite = displayio.TileGrid(button_1_sheet,
+                                    pixel_shader=button_1_sheet.pixel_shader,
                                     width=1,
                                     height=1,
                                     tile_width=16,
                                     tile_height=18,
                                     default_tile=0,
                                     x=(display.width - tile_width) // 3,
+                                    y=display.height - tile_height - 30)
+
+button_2_sheet = displayio.OnDiskBitmap("Button-2-Spritesheet.bmp")
+
+button_2_sprite = displayio.TileGrid(button_2_sheet,
+                                    pixel_shader=button_2_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=16,
+                                    tile_height=18,
+                                    default_tile=0,
+                                    x=(display.width - tile_width) // 2 + 10,
+                                    y=display.height - tile_height - 30)
+
+button_3_sheet = displayio.OnDiskBitmap("Button-3-Spritesheet.bmp")
+
+button_3_sprite = displayio.TileGrid(button_3_sheet,
+                                    pixel_shader=button_3_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=16,
+                                    tile_height=18,
+                                    default_tile=0,
+                                    x=(display.width - tile_width) // 2 + 40,
                                     y=display.height - tile_height - 30)
 
 happiness_bar_sheet = displayio.OnDiskBitmap("Happiness-Bar-Spritesheet.bmp")
@@ -93,7 +125,11 @@ battery_bar_sprite = displayio.TileGrid(battery_bar_sheet,
 
 splash.append(battery_bar_sprite)
 
-splash.append(button_sprite)
+splash.append(button_1_sprite)
+
+splash.append(button_2_sprite)
+
+splash.append(button_3_sprite)
 
 splash.append(hackamon_sprite_idle)
 
@@ -108,6 +144,9 @@ charging_station_sprite = displayio.TileGrid(charging_station_sheet,
                                     x=72,
                                     y=70)
 
+brick_sheet = displayio.OnDiskBitmap("Breakout-Bricks-Spritesheet.bmp")
+ball_sheet = displayio.OnDiskBitmap("Breakout-Ball.bmp")
+
 frame = 0
 speed = 4
 game_over = False
@@ -118,6 +157,10 @@ happiness = 5000
 battery = 5000
 charging = False
 chargingSprite = False
+ball_delta_x = 1
+ball_delta_y = 1
+MAX_SPEED = 3  # Maximum ball speed
+RANDOM_RANGE = 1  # Random range for offsetting ball direction
 
 
 def run_jump_animation():
@@ -153,16 +196,39 @@ def check_collision(sprite1, sprite2, width1, height1, width2, height2):
 def check_button_press():
     global gameState
     print("Checking Button Press...")
-    # Use the dimensions of the button and sprite for accurate detection
+    # Using the dimensions of the button and sprite for accurate detection (todo: create variables for these)
     if check_collision(
-        hackamon_sprite_idle, button_sprite,
+        hackamon_sprite_idle, button_1_sprite,
         tile_width, tile_height, 16, 18
-    ):
-        button_sprite[0] = 1  # Switch button to pressed state
+    ) and gameState == "Main":
+        button_1_sprite[0] = 1  
         print("Button Pressed!")
         time.sleep(0.5)
         gameState = "Station"
-        to_mini_game()
+        to_charging_station()
+    elif check_collision(
+        hackamon_sprite_idle, button_2_sprite,
+        tile_width, tile_height, 16, 18
+    ) and gameState == "Main":
+        button_2_sprite[0] = 1
+    elif check_collision(
+        hackamon_sprite_idle, button_2_sprite,
+        tile_width, tile_height, 16, 18
+    ) and gameState == "Station":
+        button_2_sprite[0] = 1
+        print("Button Pressed!")
+        time.sleep(0.5)
+        gameState = "Main"
+        to_main()
+    elif check_collision(
+        hackamon_sprite_idle, button_3_sprite,
+        tile_width, tile_height, 16, 18
+    ) and gameState == "Main":
+        button_3_sprite[0] = 1
+        print("Button Pressed!")
+        time.sleep(0.5)
+        gameState = "Breakout"
+        to_breakout()
 
 def charging_station():
     global battery, facing_left, charging, chargingSprite
@@ -184,6 +250,39 @@ def charging_station():
         charging = True
         chargingSprite = True
 
+
+# Bricks for breakout
+
+brick_sprites = []
+rows = 4
+columns = 6
+
+for row in range(rows):
+    for column in range(columns):
+        brick_sprite = displayio.TileGrid(brick_sheet,
+                                    pixel_shader=brick_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=brick_width,
+                                    tile_height=brick_height,
+                                    default_tile=0,
+                                    x=column * brick_width + 11 + column * 2,
+                                    y=row * brick_height + 9 + row * 2)
+        brick_sprite[0] = column
+        brick_sprites.append(brick_sprite)
+
+# Ball for breakout
+
+ball_sprite = displayio.TileGrid(ball_sheet,
+                                pixel_shader=ball_sheet.pixel_shader,
+                                width=1,
+                                height=1,
+                                tile_width=6,
+                                tile_height=6,
+                                default_tile=0,
+                                x=(display.width - 6) // 2,
+                                y=display.height // 2)
+
 def manage_stats():
     global happiness, battery, game_over, charging
     if happiness <= 0 or battery <= 0:
@@ -203,26 +302,146 @@ def manage_stats():
         print("Battery: " + str(battery))
         battery_bar_sprite[0] = 4 - math.ceil(battery // 1000)
         
-def to_mini_game():
+def breakout():
+    global ball_sprite, game_over, ball_delta_x, ball_delta_y, MAX_SPEED, RANDOM_RANGE, happiness
+    ball_sprite.y += round(ball_delta_y)
+    ball_sprite.x += round(ball_delta_x)
+
+    # Let's not make it impossible so capping the speed
+
+    ball_delta_x = max(min(ball_delta_x * 1.01, MAX_SPEED), -MAX_SPEED)
+    ball_delta_y = max(min(ball_delta_y * 1.01, MAX_SPEED), -MAX_SPEED)
+
+    if ball_sprite.y > 128 - 10 - 6:
+        ball_sprite.y = hackamon_sprite_idle.y 
+        ball_sprite.x = hackamon_sprite_idle.x + 16
+
+    if ball_sprite.y <= 0 + 7:
+        ball_delta_y = -ball_delta_y  
+
+    if ball_sprite.x >= 128 - 6 - 6:
+        ball_delta_x = -ball_delta_x
+
+    if ball_sprite.x <= 0 + 6:   
+        ball_delta_x = -ball_delta_x
+
+    if check_collision(
+        ball_sprite, hackamon_sprite_idle,
+        6, 6, tile_width, tile_height
+    ):
+        print("Ball Hit Hackamon!")
+        ball_delta_y = -ball_delta_y + random.randint(-RANDOM_RANGE, RANDOM_RANGE)
+        ball_delta_x = -ball_delta_x + random.randint(-RANDOM_RANGE, RANDOM_RANGE)
+
+    for brick in brick_sprites:
+        if check_collision(
+            ball_sprite, brick,
+            6, 6, brick_width, brick_height
+        ):
+            print("Ball Hit Brick!")
+            brick_sprites.remove(brick)
+            splash.remove(brick)
+            ball_delta_y = -ball_delta_y + random.randint(-RANDOM_RANGE, RANDOM_RANGE)
+            ball_delta_x = -ball_delta_x + random.randint(-RANDOM_RANGE, RANDOM_RANGE)
+            happiness += 40
+
+    # Ensuring ball direction remains within bounds after adding random direction offset
+    ball_delta_x = max(min(ball_delta_x, MAX_SPEED), -MAX_SPEED)
+    ball_delta_y = max(min(ball_delta_y, MAX_SPEED), -MAX_SPEED)
+
+    if len(brick_sprites) == 0:
+        print("Game Won!")
+        if happiness < 4000:
+            happiness += 1000
+        else:
+            happiness = 4999
+
+# Functions to switch between game states
+def to_breakout():
     global gameState
+    gameState = "Breakout"
     # remove all from splash
     splash.remove(hackamon_sprite_idle)
-    splash.remove(button_sprite)
+    splash.remove(desk_bg_sprite)
+    splash.remove(button_1_sprite)
+    splash.remove(button_2_sprite)
+    splash.remove(button_3_sprite)
     splash.remove(happiness_bar_sprite)
     splash.remove(battery_bar_sprite)
+    # add breakout background and sprites
+    splash.append(breakout_bg_sprite)
+    for brick in brick_sprites:
+        splash.append(brick)
+    splash.append(hackamon_sprite_idle)
+    splash.append(ball_sprite)
+    hackamon_sprite_idle.x = display.width // 2 - tile_width // 2
+    hackamon_sprite_idle.y = 118 - tile_height
+    hackamon_sprite_jump.x = display.width // 2 - tile_width // 2
+    hackamon_sprite_jump.y = 118 - tile_height
+
+
+
+
+def to_charging_station():
+    global gameState
+    gameState = "Station"
+    # remove all from splash
+    splash.remove(hackamon_sprite_idle)
+    splash.remove(button_1_sprite)
+    splash.remove(button_2_sprite)
+    splash.remove(button_3_sprite)
+    splash.remove(happiness_bar_sprite)
+    splash.remove(battery_bar_sprite)
+    splash.remove(desk_bg_sprite)
     # add station background and sprites back
     splash.append(station_bg_sprite)
     splash.append(charging_station_sprite)
-    splash.append(hackamon_sprite_idle)
     splash.append(happiness_bar_sprite)
     splash.append(battery_bar_sprite)
-
-
+    splash.append(button_2_sprite)
+    splash.append(hackamon_sprite_idle)
     
-    
+    button_2_sprite.x = 16 + 10
+    button_2_sprite.y = 128 - 18 - 10
+
+    hackamon_sprite_idle.x = 10
+    hackamon_sprite_idle.y = 128 - tile_height - 20
+    hackamon_sprite_jump.x = 10
+    hackamon_sprite_jump.y = 128 - tile_height - 20
+
+def to_main():
+    global gameState
+    gameState = "Main"
+    # remove all from splash
+    splash.remove(breakout_bg_sprite)
+    for brick in brick_sprites:
+        splash.remove(brick)
+    splash.remove(ball_sprite)
+    splash.remove(hackamon_sprite_idle)
+    splash.remove(charging_station_sprite)
+    splash.remove(station_bg_sprite)
+    splash.remove(happiness_bar_sprite)
+    splash.remove(battery_bar_sprite)
+    splash.remove(button_2_sprite)
+    # add station background and sprites back
+    splash.append(desk_bg_sprite)
+    splash.append(button_1_sprite)
+    splash.append(button_2_sprite)
+    splash.append(button_3_sprite)
+    splash.append(happiness_bar_sprite)
+    splash.append(battery_bar_sprite)
+    splash.append(hackamon_sprite_idle)
+
+    button_2_sprite.x = (display.width - tile_width) // 2 + 10
+    button_2_sprite.y = display.height - tile_height - 30
+
+    hackamon_sprite_idle.x = (display.width - tile_width) // 2
+    hackamon_sprite_idle.y = display.height - tile_height - 40
+    hackamon_sprite_jump.x = (display.width - tile_width) // 2
+    hackamon_sprite_jump.y = display.height - tile_height - 40
 
 
-
+        
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -238,7 +457,7 @@ while True:
     if game_over == False:
         if keys[pygame.K_LEFT]:
             charging = False
-            if (gameState == "Main" and hackamon_sprite_idle.x > 24) or (gameState == "Station" and hackamon_sprite_idle.x > 0):
+            if (gameState == "Main" and hackamon_sprite_idle.x > 24) or (gameState == "Station" and hackamon_sprite_idle.x > 0) or (gameState == "Breakout" and hackamon_sprite_idle.x > 0):
                 facing_left = True
                 hackamon_sprite_idle.x -= speed
                 hackamon_sprite_jump.x -= speed
@@ -247,7 +466,7 @@ while True:
 
         if keys[pygame.K_RIGHT]:
             charging = False
-            if (gameState == "Main" and hackamon_sprite_idle.x < 78) or (gameState == "Station" and hackamon_sprite_idle.x < 128 - tile_width):
+            if (gameState == "Main" and hackamon_sprite_idle.x < 78) or (gameState == "Station" and hackamon_sprite_idle.x < 128 - tile_width) or (gameState == "Breakout" and hackamon_sprite_idle.x < 128 - tile_width):
                 facing_left = False
                 hackamon_sprite_idle.x += speed
                 hackamon_sprite_jump.x += speed
@@ -267,20 +486,23 @@ while True:
                 hackamon_sprite_idle.y += speed
                 hackamon_sprite_jump.y += speed
         
-        if keys[pygame.K_SPACE] and not isJumping:
+        if keys[pygame.K_SPACE] and not isJumping and not charging:
             isJumping = True
-            charging = False
             splash.remove(hackamon_sprite_idle)
             splash.append(hackamon_sprite_jump)
             run_jump_animation()
             check_button_press()
-            charging_station()
+            if gameState == "Station":
+                 charging_station()
 
         
         
         if chargingSprite == True and not charging:
             chargingSprite = False
             splash.remove(hackamon_sprite_charging)
+
+        if gameState == "Breakout":
+            breakout()
 
         manage_stats()
 
