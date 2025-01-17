@@ -3,6 +3,7 @@ from blinka_displayio_pygamedisplay import PyGameDisplay
 from adafruit_display_text import label
 from adafruit_bitmap_font import bitmap_font
 import pygame
+import asyncio
 import time
 import math
 import random
@@ -590,89 +591,93 @@ def to_main(prevGameState):
     hackamon_sprite_jump.y = display.height - tile_height - 40
 
 
+async def main():
+    global frame, framePointer, isJumping, facing_left, gameState, charging, chargingSprite
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        if display.check_quit():
+            break
+
+
+
+        keys = pygame.key.get_pressed()
+
+        if game_over == False:
+            if keys[pygame.K_LEFT]:
+                charging = False
+                if (gameState == "Main" and hackamon_sprite_idle.x > 24) or (gameState == "Station" and hackamon_sprite_idle.x > 0) or (gameState == "Breakout" and hackamon_sprite_idle.x > 0):
+                    facing_left = True
+                    hackamon_sprite_idle.x -= speed
+                    hackamon_sprite_jump.x -= speed
+                    hackamon_sprite_idle.flip_x = False
+                    hackamon_sprite_jump.flip_x = False
+
+            if keys[pygame.K_RIGHT]:
+                charging = False
+                if (gameState == "Main" and hackamon_sprite_idle.x < 78) or (gameState == "Station" and hackamon_sprite_idle.x < 128 - tile_width) or (gameState == "Breakout" and hackamon_sprite_idle.x < 128 - tile_width):
+                    facing_left = False
+                    hackamon_sprite_idle.x += speed
+                    hackamon_sprite_jump.x += speed
+                    hackamon_sprite_idle.flip_x = True
+                    hackamon_sprite_jump.flip_x = True
+
+            # For testing! I know there will be only 3 buttons :)
+            if keys[pygame.K_UP]:
+                charging = False
+                if (gameState == "Main" and hackamon_sprite_idle.y > 64 - 20) or (gameState == "Station" and hackamon_sprite_idle.y > 96 - 20):
+                    hackamon_sprite_idle.y -= speed
+                    hackamon_sprite_jump.y -= speed
+                    
+            if keys[pygame.K_DOWN]:
+                charging = False
+                if (gameState == "Main" and hackamon_sprite_idle.y < 92 - tile_height) or (gameState == "Station" and hackamon_sprite_idle.y < 128 - tile_height):
+                    hackamon_sprite_idle.y += speed
+                    hackamon_sprite_jump.y += speed
+            
+            if keys[pygame.K_SPACE] and not isJumping and not charging:
+                isJumping = True
+                splash.remove(hackamon_sprite_idle)
+                splash.append(hackamon_sprite_jump)
+                run_jump_animation()
+                check_button_press()
+                if gameState == "Station":
+                    charging_station()
+
+            
+            
+            if chargingSprite == True and not charging:
+                chargingSprite = False
+                splash.remove(hackamon_sprite_charging)
+                hackamon_sprite_idle.x = 128 - tile_width - 10
+                hackamon_sprite_idle.y = 128 - tile_height - 10
+                hackamon_sprite_jump.x = 128 - tile_width - 10
+                hackamon_sprite_jump.y = 128 - tile_height - 10
+
+            if gameState == "Breakout":
+                breakout()
+
+            manage_stats()
+
+            
+
+
         
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-    if display.check_quit():
-        break
+        pointer_sprite_1[0] = framePointer 
+        pointer_sprite_2[0] = framePointer
+        pointer_sprite_3[0] = framePointer
+        framePointer = (framePointer + 1) % (pointer_sheet.width // 14)
 
 
+        if charging:
+            hackamon_sprite_charging[0] = frame 
 
-    keys = pygame.key.get_pressed()
+        hackamon_sprite_idle[0] = frame
+        frame = (frame + 1) % (hackamon_sheet_idle.width // tile_width)
 
-    if game_over == False:
-        if keys[pygame.K_LEFT]:
-            charging = False
-            if (gameState == "Main" and hackamon_sprite_idle.x > 24) or (gameState == "Station" and hackamon_sprite_idle.x > 0) or (gameState == "Breakout" and hackamon_sprite_idle.x > 0):
-                facing_left = True
-                hackamon_sprite_idle.x -= speed
-                hackamon_sprite_jump.x -= speed
-                hackamon_sprite_idle.flip_x = False
-                hackamon_sprite_jump.flip_x = False
+        time.sleep(0.1)
+        await asyncio.sleep(0)
 
-        if keys[pygame.K_RIGHT]:
-            charging = False
-            if (gameState == "Main" and hackamon_sprite_idle.x < 78) or (gameState == "Station" and hackamon_sprite_idle.x < 128 - tile_width) or (gameState == "Breakout" and hackamon_sprite_idle.x < 128 - tile_width):
-                facing_left = False
-                hackamon_sprite_idle.x += speed
-                hackamon_sprite_jump.x += speed
-                hackamon_sprite_idle.flip_x = True
-                hackamon_sprite_jump.flip_x = True
-
-        # For testing! I know there will be only 3 buttons :)
-        if keys[pygame.K_UP]:
-            charging = False
-            if (gameState == "Main" and hackamon_sprite_idle.y > 64 - 20) or (gameState == "Station" and hackamon_sprite_idle.y > 96 - 20):
-                hackamon_sprite_idle.y -= speed
-                hackamon_sprite_jump.y -= speed
-                
-        if keys[pygame.K_DOWN]:
-            charging = False
-            if (gameState == "Main" and hackamon_sprite_idle.y < 92 - tile_height) or (gameState == "Station" and hackamon_sprite_idle.y < 128 - tile_height):
-                hackamon_sprite_idle.y += speed
-                hackamon_sprite_jump.y += speed
-        
-        if keys[pygame.K_SPACE] and not isJumping and not charging:
-            isJumping = True
-            splash.remove(hackamon_sprite_idle)
-            splash.append(hackamon_sprite_jump)
-            run_jump_animation()
-            check_button_press()
-            if gameState == "Station":
-                 charging_station()
-
-        
-        
-        if chargingSprite == True and not charging:
-            chargingSprite = False
-            splash.remove(hackamon_sprite_charging)
-            hackamon_sprite_idle.x = 128 - tile_width - 10
-            hackamon_sprite_idle.y = 128 - tile_height - 10
-            hackamon_sprite_jump.x = 128 - tile_width - 10
-            hackamon_sprite_jump.y = 128 - tile_height - 10
-
-        if gameState == "Breakout":
-            breakout()
-
-        manage_stats()
-
-        
-
-
-    
-    pointer_sprite_1[0] = framePointer 
-    pointer_sprite_2[0] = framePointer
-    pointer_sprite_3[0] = framePointer
-    framePointer = (framePointer + 1) % (pointer_sheet.width // 14)
-
-
-    if charging:
-        hackamon_sprite_charging[0] = frame 
-
-    hackamon_sprite_idle[0] = frame
-    frame = (frame + 1) % (hackamon_sheet_idle.width // tile_width)
-
-    time.sleep(0.1)
+asyncio.run(main())
