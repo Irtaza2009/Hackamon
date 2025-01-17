@@ -135,8 +135,6 @@ splash.append(button_2_sprite)
 
 splash.append(button_3_sprite)
 
-splash.append(hackamon_sprite_idle)
-
 charging_station_sheet = displayio.OnDiskBitmap("Charging-Station.bmp")
 charging_station_sprite = displayio.TileGrid(charging_station_sheet,
                                     pixel_shader=charging_station_sheet.pixel_shader,
@@ -148,10 +146,50 @@ charging_station_sprite = displayio.TileGrid(charging_station_sheet,
                                     x=72,
                                     y=70)
 
+
+pointer_sheet = displayio.OnDiskBitmap("Pointer-Spritesheet-2x.bmp")
+pointer_sprite_1 = displayio.TileGrid(pointer_sheet,
+                                        width=1,
+                                        pixel_shader=pointer_sheet.pixel_shader,
+                                        height=1,
+                                        tile_width=14,
+                                        tile_height=12,
+                                        default_tile=0,
+                                        x=button_1_sprite.x + 16 // 2 - 14 // 2,
+                                        y=button_1_sprite.y - 9)
+pointer_sprite_2 = displayio.TileGrid(pointer_sheet,
+                                        width=1,
+                                        pixel_shader=pointer_sheet.pixel_shader,
+                                        height=1,
+                                        tile_width=14,
+                                        tile_height=12,
+                                        default_tile=0,
+                                        x=button_2_sprite.x + 16 // 2 - 14 // 2,
+                                        y=button_2_sprite.y - 9)
+pointer_sprite_3 = displayio.TileGrid(pointer_sheet,
+                                        width=1,
+                                        pixel_shader=pointer_sheet.pixel_shader,
+                                        height=1,
+                                        tile_width=14,
+                                        tile_height=12,
+                                        default_tile=0,
+                                        x=button_3_sprite.x + 16 // 2 - 14 // 2,
+                                        y=button_3_sprite.y - 9)
+
+splash.append(pointer_sprite_1)
+splash.append(pointer_sprite_2)
+splash.append(pointer_sprite_3)
+
+                                
+
+
 brick_sheet = displayio.OnDiskBitmap("Breakout-Bricks-Spritesheet.bmp")
 ball_sheet = displayio.OnDiskBitmap("Breakout-Ball.bmp")
 
+splash.append(hackamon_sprite_idle)
+
 frame = 0
+framePointer = 0
 speed = 4
 game_over = False
 isJumping = False
@@ -165,6 +203,8 @@ ball_delta_x = 1
 ball_delta_y = 1
 MAX_SPEED = 3  # Maximum ball speed
 RANDOM_RANGE = 1  # Random range for offsetting ball direction
+
+
 
 happiness_label = label.Label(
     font,
@@ -194,11 +234,6 @@ def run_jump_animation():
    
 
    for jump_frame in range(hackamon_sheet_jump.width // tile_width):
-
-    """ if jump_frame == 0:
-            hackamon_sprite_jump.y -= 10
-       elif jump_frame == hackamon_sheet_jump.width // tile_width - 1:
-            hackamon_sprite_jump.y += 10 """
 
     hackamon_sprite_jump[0] = jump_frame
     time.sleep(0.1)
@@ -407,6 +442,10 @@ def breakout():
             happiness = 4999
         to_main(gameState)
 
+
+                            
+    
+
 # Functions to switch between game states
 def to_breakout():
     global gameState
@@ -419,19 +458,28 @@ def to_breakout():
     splash.remove(button_3_sprite)
     splash.remove(happiness_bar_sprite)
     splash.remove(battery_bar_sprite)
+    splash.remove(pointer_sprite_1)
+    splash.remove(pointer_sprite_2)
+    splash.remove(pointer_sprite_3)
     
     # add breakout background and sprites
     splash.append(breakout_bg_sprite)
     splash.append(button_2_sprite)
     for brick in brick_sprites:
         splash.append(brick)
+    splash.append(pointer_sprite_1)
     splash.append(hackamon_sprite_idle)
     splash.append(ball_sprite)
+
+
     
 
     button_2_sprite.x = 16 + 10
     button_2_sprite.y = 128 - 18 - 10
     button_2_sprite[0] = 0
+
+    pointer_sprite_1.x = button_2_sprite.x + 16 // 2 - 14 // 2
+    pointer_sprite_1.y = button_2_sprite.y - 9
 
     hackamon_sprite_idle.x = display.width // 2 - tile_width // 2
     hackamon_sprite_idle.y = 118 - tile_height
@@ -452,17 +500,30 @@ def to_charging_station():
     splash.remove(happiness_bar_sprite)
     splash.remove(battery_bar_sprite)
     splash.remove(desk_bg_sprite)
+    splash.remove(pointer_sprite_1)
+    splash.remove(pointer_sprite_2)
+    splash.remove(pointer_sprite_3)
     # add station background and sprites back
     splash.append(station_bg_sprite)
     splash.append(charging_station_sprite)
     splash.append(happiness_bar_sprite)
     splash.append(battery_bar_sprite)
     splash.append(button_2_sprite)
-    splash.append(hackamon_sprite_idle)
-    
+
     button_2_sprite.x = 16 + 10
     button_2_sprite.y = 128 - 18 - 10
     button_2_sprite[0] = 0
+
+    splash.append(pointer_sprite_1)
+    splash.append(pointer_sprite_2)
+
+    splash.append(hackamon_sprite_idle)
+
+    pointer_sprite_1.x = button_2_sprite.x + 16 // 2 - 14 // 2
+    pointer_sprite_1.y = button_2_sprite.y - 9
+
+    pointer_sprite_2.x = charging_station_sprite.x + 55 // 2 - 14 // 2
+    pointer_sprite_2.y = charging_station_sprite.y + 42 // 2 - 18 // 2
 
     hackamon_sprite_idle.x = 10
     hackamon_sprite_idle.y = 128 - tile_height - 10
@@ -480,6 +541,7 @@ def to_main(prevGameState):
         for brick in brick_sprites:
             splash.remove(brick)
         splash.remove(ball_sprite)
+        splash.remove(pointer_sprite_1)
         
     splash.remove(hackamon_sprite_idle)
 
@@ -489,6 +551,8 @@ def to_main(prevGameState):
         splash.remove(station_bg_sprite)
         splash.remove(happiness_bar_sprite)
         splash.remove(battery_bar_sprite)
+        splash.remove(pointer_sprite_1)
+        splash.remove(pointer_sprite_2)
     splash.remove(button_2_sprite)
     # add main background and sprites back
     splash.append(desk_bg_sprite)
@@ -497,7 +561,7 @@ def to_main(prevGameState):
     splash.append(button_3_sprite)
     splash.append(happiness_bar_sprite)
     splash.append(battery_bar_sprite)
-    splash.append(hackamon_sprite_idle)
+   
 
     button_2_sprite.x = (display.width - tile_width) // 2 + 10
     button_2_sprite.y = display.height - tile_height - 30
@@ -505,6 +569,20 @@ def to_main(prevGameState):
     button_1_sprite[0] = 0
     button_2_sprite[0] = 0
     button_3_sprite[0] = 0
+
+    splash.append(pointer_sprite_1)
+    splash.append(pointer_sprite_2)
+    splash.append(pointer_sprite_3)
+
+    pointer_sprite_1.x=button_1_sprite.x + 16 // 2 - 14 // 2
+    pointer_sprite_1.y=button_1_sprite.y - 9
+    pointer_sprite_2.x=button_2_sprite.x + 16 // 2 - 14 // 2
+    pointer_sprite_2.y=button_2_sprite.y - 9
+    pointer_sprite_3.x=button_3_sprite.x + 16 // 2 - 14 // 2
+    pointer_sprite_3.y=button_3_sprite.y - 9
+
+
+    splash.append(hackamon_sprite_idle)
 
     hackamon_sprite_idle.x = (display.width - tile_width) // 2
     hackamon_sprite_idle.y = display.height - tile_height - 40
@@ -584,7 +662,11 @@ while True:
         
 
 
-
+    
+    pointer_sprite_1[0] = framePointer 
+    pointer_sprite_2[0] = framePointer
+    pointer_sprite_3[0] = framePointer
+    framePointer = (framePointer + 1) % (pointer_sheet.width // 14)
 
 
     if charging:
