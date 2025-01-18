@@ -10,11 +10,21 @@ import random
 
 pygame.init()
 
+# test leaderboard data
+leaderboard_data = [
+    {"username": "Irtaza", "pet_level": 5},
+    {"username": "Test", "pet_level": 4},
+    {"username": "Player 3", "pet_level": 3},
+    {"username": "Player 4", "pet_level": 2},
+    {"username": "Player 5", "pet_level": 1}
+]
+
 display = PyGameDisplay(width=128, height=128)
 splash = displayio.Group()
 display.show(splash)
 
 font = bitmap_font.load_font("PixelifySans-Regular.bdf")
+card_font = bitmap_font.load_font("PixelifySans-Regular-8px.bdf")
 
 desk_background = displayio.OnDiskBitmap("Desk-BG.bmp")
 desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
@@ -22,6 +32,8 @@ station_background = displayio.OnDiskBitmap("Station-BG.bmp")
 station_bg_sprite = displayio.TileGrid(station_background, pixel_shader=station_background.pixel_shader)
 breakout_background = displayio.OnDiskBitmap("Breakout-BG.bmp")
 breakout_bg_sprite = displayio.TileGrid(breakout_background, pixel_shader=breakout_background.pixel_shader)
+leaderboard_background = displayio.OnDiskBitmap("Leaderboard-BG.bmp")
+leaderboard_bg_sprite = displayio.TileGrid(leaderboard_background, pixel_shader=leaderboard_background.pixel_shader)
 splash.append(desk_bg_sprite)
 
 tile_width = 32
@@ -100,6 +112,17 @@ button_3_sprite = displayio.TileGrid(button_3_sheet,
                                     x=(display.width - tile_width) // 2 + 40,
                                     y=display.height - tile_height - 30)
 
+back_button_sheet = displayio.OnDiskBitmap("Back-Button-Spritesheet.bmp")
+back_button_sprite = displayio.TileGrid(back_button_sheet,
+                                    pixel_shader=back_button_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=14,
+                                    tile_height=10,
+                                    default_tile=0,
+                                    x=10,
+                                    y=10)
+
 happiness_bar_sheet = displayio.OnDiskBitmap("Happiness-Bar-Spritesheet.bmp")
 
 happiness_bar_sprite = displayio.TileGrid(happiness_bar_sheet,
@@ -177,9 +200,31 @@ pointer_sprite_3 = displayio.TileGrid(pointer_sheet,
                                         x=button_3_sprite.x + 16 // 2 - 14 // 2,
                                         y=button_3_sprite.y - 9)
 
+pointer_left_sheet = displayio.OnDiskBitmap("Pointer-Left-Spritesheet-2x.bmp")
+pointer_left_sprite = displayio.TileGrid(pointer_left_sheet,
+                                        width=1,
+                                        pixel_shader=pointer_sheet.pixel_shader,
+                                        height=1,
+                                        tile_width=14,
+                                        tile_height=12,
+                                        default_tile=0,
+                                        x=10,
+                                        y=10)
+
 splash.append(pointer_sprite_1)
 splash.append(pointer_sprite_2)
 splash.append(pointer_sprite_3)
+
+player_card_sheet = displayio.OnDiskBitmap("Player-Card-Spritesheet.bmp")
+player_card_sprite = displayio.TileGrid(player_card_sheet,
+                                    pixel_shader=player_card_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=100,
+                                    tile_height=20,
+                                    default_tile=0,
+                                    x=14,
+                                    y=5)
 
                                 
 
@@ -191,6 +236,7 @@ splash.append(hackamon_sprite_idle)
 
 frame = 0
 framePointer = 0
+frameBackButton = 0
 speed = 4
 game_over = False
 isJumping = False
@@ -272,6 +318,7 @@ def check_button_press():
         tile_width, tile_height, 16, 18
     ) and gameState == "Main":
         button_2_sprite[0] = 1
+        to_leaderboard()
     elif check_collision(
         hackamon_sprite_idle, button_2_sprite,
         tile_width, tile_height, 16, 18
@@ -350,6 +397,7 @@ def manage_stats():
     
     if happiness <= 0 or battery <= 0:
         print("Game Over!")
+        to_main(gameState)
         game_over = True
     else:
         happiness -= 1
@@ -365,7 +413,7 @@ def manage_stats():
         print("Battery: " + str(battery))
         battery_bar_sprite[0] = 4 - math.ceil(battery // 1000)
 
-    if gameState != "Breakout":
+    if gameState != "Breakout" and gameState != "Leaderboard":
         splash.remove(happiness_label)
         splash.remove(battery_label)
 
@@ -444,10 +492,79 @@ def breakout():
         to_main(gameState)
 
 
-                            
+# player data in leaderboard
+
+
+player_card_sprites = []
+player_card_usernames = []
+player_card_pet_levels = []
+
+def create_player_card(username, pet_level, x, y):             
+    player_card_sprite = displayio.TileGrid(player_card_sheet,
+                                    pixel_shader=player_card_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=100,
+                                    tile_height=20,
+                                    default_tile=0,
+                                    x=x,
+                                    y=y)
+    username_label = label.Label(card_font, text=username, color=0x7a8af0, anchor_point=(0, 0), anchored_position=(x + 5, y + 7))
+    pet_level_label = label.Label(card_font, text="Lvl: " + str(pet_level), color=0x3f3f74, anchor_point=(0, 0), anchored_position=(x + 65, y + 7))
     
+    
+    player_card_sprite[0] = (y - 10) / 22
+
+    player_card_sprites.append(player_card_sprite)
+    player_card_usernames.append(username_label)
+    player_card_pet_levels.append(pet_level_label)
+
+    splash.append(player_card_sprite)
+    splash.append(username_label)
+    splash.append(pet_level_label)
 
 # Functions to switch between game states
+
+def to_leaderboard():
+    global gameState
+    gameState = "Leaderboard"
+    # remove all from splash
+    splash.remove(hackamon_sprite_idle)
+    splash.remove(desk_bg_sprite)
+    splash.remove(button_1_sprite)
+    splash.remove(button_2_sprite)
+    splash.remove(button_3_sprite)
+    splash.remove(happiness_bar_sprite)
+    splash.remove(battery_bar_sprite)
+    splash.remove(pointer_sprite_1)
+    splash.remove(pointer_sprite_2)
+    splash.remove(pointer_sprite_3)
+
+    # leaderboard background and sprites
+    splash.append(leaderboard_bg_sprite)
+    # Display player cards for the leaderboard
+    y_position = 10
+    for player in leaderboard_data:
+        create_player_card(player['username'], player['pet_level'], 14, y_position)
+        y_position += 20 + 2
+    #splash.append(back_button_sprite)
+    splash.append(pointer_sprite_1)
+    splash.append(pointer_sprite_2)
+    splash.append(pointer_left_sprite)
+
+    pointer_sprite_1.x = 24 - 14 // 2
+    pointer_sprite_1.y = 128 - 10
+    pointer_sprite_2.x = 128 - 24 - 14 // 2
+    pointer_sprite_2.y = 128 - 10
+    pointer_sprite_2.flip_y = True
+    pointer_left_sprite.x = 128 // 2 - 14 // 2
+    pointer_left_sprite.y = 128 - 10
+
+    #back_button_sprite.x = 128 // 2 - 14 // 2
+    #back_button_sprite.y = 128 - 10 
+
+
+
 def to_breakout():
     global gameState
     gameState = "Breakout"
@@ -536,25 +653,44 @@ def to_main(prevGameState):
     gameState = "Main"
     # remove all from splash
 
-    # if from breakout
-    if prevGameState == "Breakout":
-        splash.remove(breakout_bg_sprite)
-        for brick in brick_sprites:
-            splash.remove(brick)
-        splash.remove(ball_sprite)
+    if prevGameState == "Leaderboard":
+        splash.remove(leaderboard_bg_sprite)
+        for player_card in player_card_sprites:
+            player_card_sprites.remove(player_card)
+            splash.remove(player_card)
+        for username in player_card_usernames:
+            player_card_usernames.remove(username)
+            splash.remove(username)
+        for pet_level in player_card_pet_levels:
+            player_card_pet_levels.remove(pet_level)
+            splash.remove(pet_level)
+        #splash.remove(back_button_sprite)
         splash.remove(pointer_sprite_1)
-        
-    splash.remove(hackamon_sprite_idle)
-
-    # if from station
-    if prevGameState == "Station": 
-        splash.remove(charging_station_sprite)
-        splash.remove(station_bg_sprite)
-        splash.remove(happiness_bar_sprite)
-        splash.remove(battery_bar_sprite)
-        splash.remove(pointer_sprite_1)
+        pointer_sprite_2.flip_y = False
         splash.remove(pointer_sprite_2)
-    splash.remove(button_2_sprite)
+        splash.remove(pointer_left_sprite)
+    else:
+
+        # if from breakout
+        if prevGameState == "Breakout":
+            splash.remove(breakout_bg_sprite)
+            for brick in brick_sprites:
+                splash.remove(brick)
+            splash.remove(ball_sprite)
+            splash.remove(pointer_sprite_1)
+            
+        splash.remove(hackamon_sprite_idle)
+
+        # if from station
+        if prevGameState == "Station": 
+            splash.remove(charging_station_sprite)
+            splash.remove(station_bg_sprite)
+            splash.remove(happiness_bar_sprite)
+            splash.remove(battery_bar_sprite)
+            splash.remove(pointer_sprite_1)
+            splash.remove(pointer_sprite_2)
+        splash.remove(button_2_sprite)
+
     # add main background and sprites back
     splash.append(desk_bg_sprite)
     splash.append(button_1_sprite)
@@ -592,7 +728,7 @@ def to_main(prevGameState):
 
 
 async def main():
-    global frame, framePointer, isJumping, facing_left, gameState, charging, chargingSprite
+    global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -637,7 +773,11 @@ async def main():
                     hackamon_sprite_idle.y += speed
                     hackamon_sprite_jump.y += speed
             
-            if keys[pygame.K_SPACE] and not isJumping and not charging:
+            if keys[pygame.K_SPACE] and gameState == "Leaderboard":
+                    time.sleep(0.5)
+                    to_main(gameState)
+
+            elif keys[pygame.K_SPACE] and not isJumping and not charging:        
                 isJumping = True
                 splash.remove(hackamon_sprite_idle)
                 splash.append(hackamon_sprite_jump)
@@ -668,7 +808,11 @@ async def main():
         pointer_sprite_1[0] = framePointer 
         pointer_sprite_2[0] = framePointer
         pointer_sprite_3[0] = framePointer
+        pointer_left_sprite[0] = framePointer
         framePointer = (framePointer + 1) % (pointer_sheet.width // 14)
+
+        back_button_sprite[0] = frameBackButton
+        frameBackButton = (frameBackButton + 1) % (back_button_sheet.width // 14)
 
 
         if charging:
