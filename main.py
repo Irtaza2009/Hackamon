@@ -10,19 +10,20 @@ import random
 
 pygame.init()
 
-display = PyGameDisplay(width=128, height=128)
-splash = displayio.Group()
-display.show(splash)
+display = pygame.display.set_mode((128, 128))
+pygame.display.set_caption("Hackamon")
+splash = pygame.Surface((128, 128))  
 
-font = bitmap_font.load_font("PixelifySans-Regular.bdf")
+font = pygame.font.Font("PixelifySans-Regular.ttf", 6)  # Load a font file with size 6
 
-desk_background = displayio.OnDiskBitmap("Desk-BG.bmp")
-desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
-station_background = displayio.OnDiskBitmap("Station-BG.bmp")
-station_bg_sprite = displayio.TileGrid(station_background, pixel_shader=station_background.pixel_shader)
-breakout_background = displayio.OnDiskBitmap("Breakout-BG.bmp")
-breakout_bg_sprite = displayio.TileGrid(breakout_background, pixel_shader=breakout_background.pixel_shader)
-splash.append(desk_bg_sprite)
+
+# Load backgrounds as Surfaces
+desk_background = pygame.image.load("Desk-BG.bmp")
+station_background = pygame.image.load("Station-BG.bmp")
+breakout_background = pygame.image.load("Breakout-BG.bmp")
+
+# Initial background 
+current_background = desk_background
 
 tile_width = 32
 tile_height = 32
@@ -204,28 +205,15 @@ ball_delta_x = 1
 ball_delta_y = 1
 MAX_SPEED = 3  # Maximum ball speed
 RANDOM_RANGE = 1  # Random range for offsetting ball direction
+black_color = (0, 0, 0)
 
 
+# Helper function to render text
+def render_label(text, font, color, position, surface):
+    text_surface = font.render(str(text), True, color)
+    surface.blit(text_surface, position)
 
-happiness_label = label.Label(
-    font,
-    text=str(happiness),
-    color=0x000000,  # Black color
-    anchor_point=(0.5, 0),
-    anchored_position=(happiness_bar_sprite.x + 28, happiness_bar_sprite.y + 2)
-)
 
-splash.append(happiness_label)
-
-battery_label = label.Label(
-    font,
-    text=str(battery),
-    color=0x000000,  # Black color
-    anchor_point=(0.5, 0),
-    anchored_position=(battery_bar_sprite.x + 28, battery_bar_sprite.y + 2)
-)
-
-splash.append(battery_label)
 
 
 
@@ -593,11 +581,11 @@ def to_main(prevGameState):
 
 async def main():
     global frame, framePointer, isJumping, facing_left, gameState, charging, chargingSprite
-    while True:
+    running = True
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
         if display.check_quit():
             break
 
@@ -661,7 +649,15 @@ async def main():
 
             manage_stats()
 
-            
+         # Draw happiness label
+        happiness_pos = (50, 20)  # Example position
+        render_label(happiness, font, black_color, happiness_pos, splash)
+        
+        # Draw battery label
+        battery_pos = (50, 50)  # Example position
+        render_label(battery, font, black_color, battery_pos, splash)
+
+        display.blit(current_background, (0, 0))
 
 
         
@@ -679,5 +675,7 @@ async def main():
 
         time.sleep(0.1)
         await asyncio.sleep(0)
+        display.blit(splash, (0, 0))
+        pygame.display.flip()
 
 asyncio.run(main())
