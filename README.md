@@ -3,13 +3,33 @@
 ![Hackamon Logo](https://cloud-7adfvs3rn-hack-club-bot.vercel.app/0hackamon__1_.png)
 _A virtual pet game submitted for the **Hackapet YSWS** by **Hack Club**_
 
-![Playthrough](https://cloud-jrgb41ndb-hack-club-bot.vercel.app/0screen_recording_2025-01-20_at_6.06.50_pm.mp4)
+Take care of your Hackamon, charge it, play games and battle your way to the top of the leaderboard! Upgrade your Hackamon to make it stronger and ensure its happiness and energy are always at their best.
+
+## Demo
+
 _Built to run on a ESP32-S2 Mini2 powered custom tamagotchi!_
 
-Take care of your Hackamon, charge it, play games and battle your way to the top of the leaderboard! Upgrade your Hackamon to make it stronger and ensure its happiness and energy are always at their best.
+![Short Demo of full game](https://cloud-jrgb41ndb-hack-club-bot.vercel.app/0screen_recording_2025-01-20_at_6.06.50_pm.mp4)
+
+[here](https://cloud-jrgb41ndb-hack-club-bot.vercel.app/0screen_recording_2025-01-20_at_6.06.50_pm.mp4)
+
+_Breakout Minigame_
+
+![Breaout Scene](https://cloud-d838srl6u-hack-club-bot.vercel.app/3hackamon_demo_breakout.gif)
+
+_Charging Station_
+
+![Charging Scene](https://cloud-d838srl6u-hack-club-bot.vercel.app/2hackamon_demo_charging_station.gif)
+
+_Leaderboard_
+
+![Leaderboard](https://cloud-d838srl6u-hack-club-bot.vercel.app/1hackamon_demo_leaderboard.gif)
+
+**_All of these pixel art sprites have been drawn by me!!!_**
 
 ## 🎮 **Current Game Features**
 
+- **Custom Pixel Art Sprites**: _All of the pixel art sprites have been **drawn by me**! My first venture in pixel art!!!_
 - **Main Home Scene**: Central hub for all your Hackamon's activities.
 - **Charging Station Scene**: Keep your Hackamon powered up and ready for action.
 - **Breakout Scene**: A mini-game to play with your Hackamon.
@@ -24,6 +44,8 @@ Take care of your Hackamon, charge it, play games and battle your way to the top
 - **Visual Animated Pointers** to guide you through button selections.
 - **Dynamic Happiness Bar**: Reflects your Hackamon's mood with multiple sprites.
 - **Dynamic Battery Bar**: Displays your Hackamon's energy level with multiple sprites.
+- **Day Night Cycle Bar**: Shows the phases of the day with an animated bar.
+- **Leveling System**: You level up each day your **Hackamon** survives!
 
 ## 🚀 **Upcoming Game Features**
 
