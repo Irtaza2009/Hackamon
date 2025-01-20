@@ -2,6 +2,7 @@ import displayio
 from blinka_displayio_pygamedisplay import PyGameDisplay
 from adafruit_display_text import label
 from adafruit_bitmap_font import bitmap_font
+from adafruit_display_shapes.rect import Rect
 import pygame
 import asyncio
 import time
@@ -10,13 +11,15 @@ import random
 
 pygame.init()
 
+
+
 # test leaderboard data
 leaderboard_data = [
-    {"username": "Irtaza", "pet_level": 5},
+    {"username": "Irtaza", "pet_level": 6},
     {"username": "Test", "pet_level": 4},
-    {"username": "Player 3", "pet_level": 3},
-    {"username": "Player 4", "pet_level": 2},
-    {"username": "Player 5", "pet_level": 1}
+    {"username": "Pet", "pet_level": 3},
+    {"username": "Childe", "pet_level": 2},
+    {"username": "Robo", "pet_level": 1}
 ]
 
 display = PyGameDisplay(width=128, height=128)
@@ -25,6 +28,7 @@ display.show(splash)
 
 font = bitmap_font.load_font("PixelifySans-Regular.bdf")
 card_font = bitmap_font.load_font("PixelifySans-Regular-8px.bdf")
+font24px = bitmap_font.load_font("PixelifySans-Regular-24px.bdf")
 
 desk_background = displayio.OnDiskBitmap("Desk-BG.bmp")
 desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
@@ -153,6 +157,19 @@ battery_bar_sprite = displayio.TileGrid(battery_bar_sheet,
 
 splash.append(battery_bar_sprite)
 
+day_night_cycle_bar_sheet = displayio.OnDiskBitmap("Day-Night-Bar-Spritesheet.bmp")
+day_night_cycle_bar_sprite = displayio.TileGrid(day_night_cycle_bar_sheet,
+                                    pixel_shader=day_night_cycle_bar_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=48,
+                                    tile_height=10,
+                                    default_tile=0,
+                                    x=5,
+                                    y=32)
+
+splash.append(day_night_cycle_bar_sprite)
+
 splash.append(button_1_sprite)
 
 splash.append(button_2_sprite)
@@ -244,6 +261,9 @@ facing_left = True
 gameState = "Main"
 happiness = 5000
 battery = 5000
+day_night = 5000
+day = 0
+level = 0
 charging = False
 chargingSprite = False
 ball_delta_x = 1
@@ -272,6 +292,14 @@ battery_label = label.Label(
 )
 
 splash.append(battery_label)
+
+level_label = label.Label(
+    font24px,
+    text="Level: " + str(level),
+    color=0xFFFFFF,
+    anchor_point=(0.5, 0.5),
+    anchored_position=(display.width // 2, display.height // 2)
+)
 
 
 
@@ -393,7 +421,7 @@ ball_sprite = displayio.TileGrid(ball_sheet,
                                 y=display.height // 2)
 
 def manage_stats():
-    global happiness, battery, game_over, charging, happiness_label, battery_label
+    global happiness, battery, game_over, charging, happiness_label, battery_label, level_label, day_night, day, level
     
     if happiness <= 0 or battery <= 0:
         print("Game Over!")
@@ -401,7 +429,7 @@ def manage_stats():
         game_over = True
     else:
         happiness -= 1
-        print("Happiness: " + str(happiness))
+        #print("Happiness: " + str(happiness))
         happiness_bar_sprite[0] = 4 - math.ceil(happiness // 1000)
         if charging:
             if battery < 4999:
@@ -410,7 +438,7 @@ def manage_stats():
                 charging = False
         else:
             battery -= 1
-        print("Battery: " + str(battery))
+        #print("Battery: " + str(battery))
         battery_bar_sprite[0] = 4 - math.ceil(battery // 1000)
 
     if gameState != "Breakout" and gameState != "Leaderboard":
@@ -435,6 +463,37 @@ def manage_stats():
         )
 
         splash.append(battery_label)
+
+    
+    if day_night == 0:
+        day += 1
+        day_night = 4900
+        level += 1
+
+
+        level_label = label.Label(
+            font24px,
+            text="Level: " + str(level),
+            color=0xFFFFFF,
+            anchor_point=(0.5, 0.5),
+            anchored_position=(display.width // 2, display.height // 2)
+        )
+
+        background_rect = Rect(2, 50, 126, 30, fill=0x222034)
+    
+        # Append the rectangle and the label to the splash group
+        splash.append(background_rect)
+
+        splash.append(level_label)
+        time.sleep(2)
+        splash.remove(level_label)
+        splash.remove(background_rect)
+
+    else:
+        day_night -= 20
+
+        day_night_cycle_bar_sprite[0] = 4 - math.ceil(day_night // 1000)
+
         
 def breakout():
     global ball_sprite, game_over, ball_delta_x, ball_delta_y, MAX_SPEED, RANDOM_RANGE, happiness
@@ -536,13 +595,14 @@ def to_leaderboard():
     splash.remove(button_3_sprite)
     splash.remove(happiness_bar_sprite)
     splash.remove(battery_bar_sprite)
+    splash.remove(day_night_cycle_bar_sprite)
     splash.remove(pointer_sprite_1)
     splash.remove(pointer_sprite_2)
     splash.remove(pointer_sprite_3)
 
     # leaderboard background and sprites
     splash.append(leaderboard_bg_sprite)
-    # Display player cards for the leaderboard
+    # player cards for the leaderboard
     y_position = 10
     for player in leaderboard_data:
         create_player_card(player['username'], player['pet_level'], 14, y_position)
@@ -576,6 +636,7 @@ def to_breakout():
     splash.remove(button_3_sprite)
     splash.remove(happiness_bar_sprite)
     splash.remove(battery_bar_sprite)
+    splash.remove(day_night_cycle_bar_sprite)
     splash.remove(pointer_sprite_1)
     splash.remove(pointer_sprite_2)
     splash.remove(pointer_sprite_3)
@@ -617,6 +678,7 @@ def to_charging_station():
     splash.remove(button_3_sprite)
     splash.remove(happiness_bar_sprite)
     splash.remove(battery_bar_sprite)
+    splash.remove(day_night_cycle_bar_sprite)
     splash.remove(desk_bg_sprite)
     splash.remove(pointer_sprite_1)
     splash.remove(pointer_sprite_2)
@@ -625,6 +687,7 @@ def to_charging_station():
     splash.append(station_bg_sprite)
     splash.append(charging_station_sprite)
     splash.append(happiness_bar_sprite)
+    splash.append(day_night_cycle_bar_sprite)
     splash.append(battery_bar_sprite)
     splash.append(button_2_sprite)
 
@@ -687,6 +750,7 @@ def to_main(prevGameState):
             splash.remove(station_bg_sprite)
             splash.remove(happiness_bar_sprite)
             splash.remove(battery_bar_sprite)
+            splash.remove(day_night_cycle_bar_sprite)
             splash.remove(pointer_sprite_1)
             splash.remove(pointer_sprite_2)
         splash.remove(button_2_sprite)
@@ -698,6 +762,7 @@ def to_main(prevGameState):
     splash.append(button_3_sprite)
     splash.append(happiness_bar_sprite)
     splash.append(battery_bar_sprite)
+    splash.append(day_night_cycle_bar_sprite)
    
 
     button_2_sprite.x = (display.width - tile_width) // 2 + 10

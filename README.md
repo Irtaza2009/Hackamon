@@ -3,6 +3,9 @@
 ![Hackamon Logo](https://cloud-7adfvs3rn-hack-club-bot.vercel.app/0hackamon__1_.png)
 _A virtual pet game submitted for the **Hackapet YSWS** by **Hack Club**_
 
+![Playthrough](https://cloud-jrgb41ndb-hack-club-bot.vercel.app/0screen_recording_2025-01-20_at_6.06.50_pm.mp4)
+_Built to run on a ESP32-S2 Mini2 powered custom tamagotchi!_
+
 Take care of your Hackamon, charge it, play games and battle your way to the top of the leaderboard! Upgrade your Hackamon to make it stronger and ensure its happiness and energy are always at their best.
 
 ## 🎮 **Current Game Features**
@@ -16,6 +19,7 @@ Take care of your Hackamon, charge it, play games and battle your way to the top
 - **Controls**:
   - Use **Left** and **Right** arrow keys for movement.
   - Press the **Space Bar** for selections.
+- **Online Leaderboard**: Aim for the top!
 - **Interactive Buttons** with animations and feedback.
 - **Visual Animated Pointers** to guide you through button selections.
 - **Dynamic Happiness Bar**: Reflects your Hackamon's mood with multiple sprites.
@@ -24,7 +28,6 @@ Take care of your Hackamon, charge it, play games and battle your way to the top
 ## 🚀 **Upcoming Game Features**
 
 - **Battle Scene**: Engage in epic online battles to prove your Hackamon's strength.
-- **Online Leaderboard**: Aim for the top!
 - **Upgrade System**: Enhance your Hackamon's abilities.
 
 ## Contribute
