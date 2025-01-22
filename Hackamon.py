@@ -4,7 +4,7 @@ from adafruit_display_text import label
 from adafruit_bitmap_font import bitmap_font
 from adafruit_display_shapes.rect import Rect
 import pygame
-import asyncio
+#import asyncio
 import time
 import math
 import random
@@ -13,295 +13,337 @@ import random
 
 
 class Hackamon:
-    pygame.init()
+
+    def __init__(self, display, splash):
+
+        #pygame.init()
+        
     
-    # test leaderboard data
-    leaderboard_data = [
-        {"username": "Irtaza", "pet_level": 6},
-        {"username": "Test", "pet_level": 4},
-        {"username": "Pet", "pet_level": 3},
-        {"username": "Childe", "pet_level": 2},
-        {"username": "Robo", "pet_level": 1}
-    ]
+    
+        # test leaderboard data
+        self.leaderboard_data = [
+            {"username": "Irtaza", "pet_level": 6},
+            {"username": "Test", "pet_level": 4},
+            {"username": "Pet", "pet_level": 3},
+            {"username": "Childe", "pet_level": 2},
+            {"username": "Robo", "pet_level": 1}
+        ]
 
-    display = PyGameDisplay(width=128, height=128)
-    splash = displayio.Group()
-    display.show(splash)
+        self.display = display
+        
+        self.splash = splash
+        self.display.show(self.splash)
 
-    font = bitmap_font.load_font("fonts/PixelifySans-Regular.bdf")
-    card_font = bitmap_font.load_font("fonts/PixelifySans-Regular-8px.bdf")
-    font24px = bitmap_font.load_font("fonts/PixelifySans-Regular-24px.bdf")
+        self.splash.pop()
 
-    desk_background = displayio.OnDiskBitmap("assets/Desk-BG.bmp")
-    desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
-    station_background = displayio.OnDiskBitmap("assets/Station-BG.bmp")
-    station_bg_sprite = displayio.TileGrid(station_background, pixel_shader=station_background.pixel_shader)
-    breakout_background = displayio.OnDiskBitmap("assets/Breakout-BG.bmp")
-    breakout_bg_sprite = displayio.TileGrid(breakout_background, pixel_shader=breakout_background.pixel_shader)
-    leaderboard_background = displayio.OnDiskBitmap("assets/Leaderboard-BG.bmp")
-    leaderboard_bg_sprite = displayio.TileGrid(leaderboard_background, pixel_shader=leaderboard_background.pixel_shader)
-    splash.append(desk_bg_sprite)
+        
 
-    tile_width = 32
-    tile_height = 32
+        self.font = bitmap_font.load_font("fonts/PixelifySans-Regular.bdf")
+        self.card_font = bitmap_font.load_font("fonts/PixelifySans-Regular-8px.bdf")
+        self.font24px = bitmap_font.load_font("fonts/PixelifySans-Regular-24px.bdf")
 
-    brick_height = 8
-    brick_width = 16
+        self.desk_background = displayio.OnDiskBitmap("assets/Desk-BG.bmp")
+        self.desk_bg_sprite = displayio.TileGrid(self.desk_background, pixel_shader=self.desk_background.pixel_shader)
+        self.station_background = displayio.OnDiskBitmap("assets/Station-BG.bmp")
+        self.station_bg_sprite = displayio.TileGrid(self.station_background, pixel_shader=self.station_background.pixel_shader)
+        self.breakout_background = displayio.OnDiskBitmap("assets/Breakout-BG.bmp")
+        self.breakout_bg_sprite = displayio.TileGrid(self.breakout_background, pixel_shader=self.breakout_background.pixel_shader)
+        self.leaderboard_background = displayio.OnDiskBitmap("assets/Leaderboard-BG.bmp")
+        self.leaderboard_bg_sprite = displayio.TileGrid(self.leaderboard_background, pixel_shader=self.leaderboard_background.pixel_shader)
+        self.splash.append(self.desk_bg_sprite)
 
-    hackamon_sheet_idle = displayio.OnDiskBitmap("assets/Hackamon-1-Idle-Spritesheet.bmp")
-    hackamon_sprite_idle = displayio.TileGrid(hackamon_sheet_idle,
-                                        pixel_shader=hackamon_sheet_idle.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=tile_width,
-                                        tile_height=tile_height,
-                                        default_tile=0,
-                                        x=(display.width - tile_width) // 2,
-                                        y=display.height - tile_height - 40)
+        self.tile_width = 32
+        self.tile_height = 32
 
+        self.brick_height = 8
+        self.brick_width = 16
 
-    hackamon_sheet_jump = displayio.OnDiskBitmap("assets/Hackamon-1-Jump-Spritesheet.bmp")
-    hackamon_sprite_jump = displayio.TileGrid(hackamon_sheet_jump,
-                                            pixel_shader=hackamon_sheet_jump.pixel_shader,
+        self.hackamon_sheet_idle = displayio.OnDiskBitmap("assets/Hackamon-1-Idle-Spritesheet.bmp")
+        self.hackamon_sprite_idle = displayio.TileGrid(self.hackamon_sheet_idle,
+                                            pixel_shader=self.hackamon_sheet_idle.pixel_shader,
                                             width=1,
                                             height=1,
-                                            tile_width=tile_width,
-                                            tile_height=tile_height,
+                                            tile_width=self.tile_width,
+                                            tile_height=self.tile_height,
                                             default_tile=0,
-                                            x=(display.width - tile_width) // 2,
-                                            y=display.height - tile_height - 40)
+                                            x=(self.display.width - self.tile_width) // 2,
+                                            y=self.display.height - self.tile_height - 40)
 
-    hackamon_sheet_charging = displayio.OnDiskBitmap("assets/Hackamon-1-Charging-Spritesheet.bmp")
-    hackamon_sprite_charging = displayio.TileGrid(hackamon_sheet_charging,
-                                            pixel_shader=hackamon_sheet_charging.pixel_shader,
+
+        self.hackamon_sheet_jump = displayio.OnDiskBitmap("assets/Hackamon-1-Jump-Spritesheet.bmp")
+        self.hackamon_sprite_jump = displayio.TileGrid(self.hackamon_sheet_jump,
+                                                pixel_shader=self.hackamon_sheet_jump.pixel_shader,
+                                                width=1,
+                                                height=1,
+                                                tile_width=self.tile_width,
+                                                tile_height=self.tile_height,
+                                                default_tile=0,
+                                                x=(self.display.width - self.tile_width) // 2,
+                                                y=self.display.height - self.tile_height - 40)
+
+        self.hackamon_sheet_charging = displayio.OnDiskBitmap("assets/Hackamon-1-Charging-Spritesheet.bmp")
+        self.hackamon_sprite_charging = displayio.TileGrid(self.hackamon_sheet_charging,
+                                                pixel_shader=self.hackamon_sheet_charging.pixel_shader,
+                                                width=1,
+                                                height=1,
+                                                tile_width=self.tile_width,
+                                                tile_height=self.tile_height,
+                                                default_tile=0,
+                                                x=85,
+                                                y=70)
+
+        self.button_1_sheet = displayio.OnDiskBitmap("assets/Button-1-Spritesheet.bmp")
+
+        self.button_1_sprite = displayio.TileGrid(self.button_1_sheet,
+                                            pixel_shader=self.button_1_sheet.pixel_shader,
                                             width=1,
                                             height=1,
-                                            tile_width=tile_width,
-                                            tile_height=tile_height,
+                                            tile_width=16,
+                                            tile_height=18,
                                             default_tile=0,
-                                            x=85,
-                                            y=70)
+                                            x=(self.display.width - self.tile_width) // 3,
+                                            y=self.display.height - self.tile_height - 30)
 
-    button_1_sheet = displayio.OnDiskBitmap("assets/Button-1-Spritesheet.bmp")
+        self.button_2_sheet = displayio.OnDiskBitmap("assets/Button-2-Spritesheet.bmp")
 
-    button_1_sprite = displayio.TileGrid(button_1_sheet,
-                                        pixel_shader=button_1_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=16,
-                                        tile_height=18,
-                                        default_tile=0,
-                                        x=(display.width - tile_width) // 3,
-                                        y=display.height - tile_height - 30)
-
-    button_2_sheet = displayio.OnDiskBitmap("assets/Button-2-Spritesheet.bmp")
-
-    button_2_sprite = displayio.TileGrid(button_2_sheet,
-                                        pixel_shader=button_2_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=16,
-                                        tile_height=18,
-                                        default_tile=0,
-                                        x=(display.width - tile_width) // 2 + 10,
-                                        y=display.height - tile_height - 30)
-
-    button_3_sheet = displayio.OnDiskBitmap("assets/Button-3-Spritesheet.bmp")
-
-    button_3_sprite = displayio.TileGrid(button_3_sheet,
-                                        pixel_shader=button_3_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=16,
-                                        tile_height=18,
-                                        default_tile=0,
-                                        x=(display.width - tile_width) // 2 + 40,
-                                        y=display.height - tile_height - 30)
-
-    back_button_sheet = displayio.OnDiskBitmap("assets/Back-Button-Spritesheet.bmp")
-    back_button_sprite = displayio.TileGrid(back_button_sheet,
-                                        pixel_shader=back_button_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=14,
-                                        tile_height=10,
-                                        default_tile=0,
-                                        x=10,
-                                        y=10)
-
-    happiness_bar_sheet = displayio.OnDiskBitmap("assets/Happiness-Bar-Spritesheet.bmp")
-
-    happiness_bar_sprite = displayio.TileGrid(happiness_bar_sheet,
-                                        pixel_shader=happiness_bar_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=48,
-                                        tile_height=10,
-                                        default_tile=0,
-                                        x=5,
-                                        y=8)
-
-    splash.append(happiness_bar_sprite)
-
-
-
-    battery_bar_sheet = displayio.OnDiskBitmap("assets/Battery-Bar-Spritesheet.bmp")
-
-    battery_bar_sprite = displayio.TileGrid(battery_bar_sheet,
-                                        pixel_shader=battery_bar_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=48,
-                                        tile_height=10,
-                                        default_tile=0,
-                                        x=5,
-                                        y=20)
-
-    splash.append(battery_bar_sprite)
-
-    day_night_cycle_bar_sheet = displayio.OnDiskBitmap("assets/Day-Night-Bar-Spritesheet.bmp")
-    day_night_cycle_bar_sprite = displayio.TileGrid(day_night_cycle_bar_sheet,
-                                        pixel_shader=day_night_cycle_bar_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=48,
-                                        tile_height=10,
-                                        default_tile=0,
-                                        x=5,
-                                        y=32)
-
-    splash.append(day_night_cycle_bar_sprite)
-
-    splash.append(button_1_sprite)
-
-    splash.append(button_2_sprite)
-
-    splash.append(button_3_sprite)
-
-    charging_station_sheet = displayio.OnDiskBitmap("assets/Charging-Station.bmp")
-    charging_station_sprite = displayio.TileGrid(charging_station_sheet,
-                                        pixel_shader=charging_station_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=55,
-                                        tile_height=42,
-                                        default_tile=0,
-                                        x=72,
-                                        y=70)
-
-
-    pointer_sheet = displayio.OnDiskBitmap("assets/Pointer-Spritesheet-2x.bmp")
-    pointer_sprite_1 = displayio.TileGrid(pointer_sheet,
+        self.button_2_sprite = displayio.TileGrid(self.button_2_sheet,
+                                            pixel_shader=self.button_2_sheet.pixel_shader,
                                             width=1,
-                                            pixel_shader=pointer_sheet.pixel_shader,
+                                            height=1,
+                                            tile_width=16,
+                                            tile_height=18,
+                                            default_tile=0,
+                                            x=(self.display.width - self.tile_width) // 2 + 10,
+                                            y=self.display.height - self.tile_height - 30)
+
+        self.button_3_sheet = displayio.OnDiskBitmap("assets/Button-3-Spritesheet.bmp")
+
+        self.button_3_sprite = displayio.TileGrid(self.button_3_sheet,
+                                            pixel_shader=self.button_3_sheet.pixel_shader,
+                                            width=1,
+                                            height=1,
+                                            tile_width=16,
+                                            tile_height=18,
+                                            default_tile=0,
+                                            x=(self.display.width - self.tile_width) // 2 + 40,
+                                            y=self.display.height - self.tile_height - 30)
+
+        self.back_button_sheet = displayio.OnDiskBitmap("assets/Back-Button-Spritesheet.bmp")
+        self.back_button_sprite = displayio.TileGrid(self.back_button_sheet,
+                                            pixel_shader=self.back_button_sheet.pixel_shader,
+                                            width=1,
                                             height=1,
                                             tile_width=14,
-                                            tile_height=12,
-                                            default_tile=0,
-                                            x=button_1_sprite.x + 16 // 2 - 14 // 2,
-                                            y=button_1_sprite.y - 9)
-    pointer_sprite_2 = displayio.TileGrid(pointer_sheet,
-                                            width=1,
-                                            pixel_shader=pointer_sheet.pixel_shader,
-                                            height=1,
-                                            tile_width=14,
-                                            tile_height=12,
-                                            default_tile=0,
-                                            x=button_2_sprite.x + 16 // 2 - 14 // 2,
-                                            y=button_2_sprite.y - 9)
-    pointer_sprite_3 = displayio.TileGrid(pointer_sheet,
-                                            width=1,
-                                            pixel_shader=pointer_sheet.pixel_shader,
-                                            height=1,
-                                            tile_width=14,
-                                            tile_height=12,
-                                            default_tile=0,
-                                            x=button_3_sprite.x + 16 // 2 - 14 // 2,
-                                            y=button_3_sprite.y - 9)
-
-    pointer_left_sheet = displayio.OnDiskBitmap("assets/Pointer-Left-Spritesheet-2x.bmp")
-    pointer_left_sprite = displayio.TileGrid(pointer_left_sheet,
-                                            width=1,
-                                            pixel_shader=pointer_sheet.pixel_shader,
-                                            height=1,
-                                            tile_width=14,
-                                            tile_height=12,
+                                            tile_height=10,
                                             default_tile=0,
                                             x=10,
                                             y=10)
 
-    splash.append(pointer_sprite_1)
-    splash.append(pointer_sprite_2)
-    splash.append(pointer_sprite_3)
+        self.happiness_bar_sheet = displayio.OnDiskBitmap("assets/Happiness-Bar-Spritesheet.bmp")
 
-    player_card_sheet = displayio.OnDiskBitmap("assets/Player-Card-Spritesheet.bmp")
-    player_card_sprite = displayio.TileGrid(player_card_sheet,
-                                        pixel_shader=player_card_sheet.pixel_shader,
+        self.happiness_bar_sprite = displayio.TileGrid(self.happiness_bar_sheet,
+                                            pixel_shader=self.happiness_bar_sheet.pixel_shader,
+                                            width=1,
+                                            height=1,
+                                            tile_width=48,
+                                            tile_height=10,
+                                            default_tile=0,
+                                            x=5,
+                                            y=8)
+
+        self.splash.append(self.happiness_bar_sprite)
+
+
+
+        self.battery_bar_sheet = displayio.OnDiskBitmap("assets/Battery-Bar-Spritesheet.bmp")
+
+        self.battery_bar_sprite = displayio.TileGrid(self.battery_bar_sheet,
+                                            pixel_shader=self.battery_bar_sheet.pixel_shader,
+                                            width=1,
+                                            height=1,
+                                            tile_width=48,
+                                            tile_height=10,
+                                            default_tile=0,
+                                            x=5,
+                                            y=20)
+
+        self.splash.append(self.battery_bar_sprite)
+
+        self.day_night_cycle_bar_sheet = displayio.OnDiskBitmap("assets/Day-Night-Bar-Spritesheet.bmp")
+        self.day_night_cycle_bar_sprite = displayio.TileGrid(self.day_night_cycle_bar_sheet,
+                                            pixel_shader=self.day_night_cycle_bar_sheet.pixel_shader,
+                                            width=1,
+                                            height=1,
+                                            tile_width=48,
+                                            tile_height=10,
+                                            default_tile=0,
+                                            x=5,
+                                            y=32)
+
+        self.splash.append(self.day_night_cycle_bar_sprite)
+
+        self.splash.append(self.button_1_sprite)
+
+        self.splash.append(self.button_2_sprite)
+
+        self.splash.append(self.button_3_sprite)
+
+        self.charging_station_sheet = displayio.OnDiskBitmap("assets/Charging-Station.bmp")
+        self.charging_station_sprite = displayio.TileGrid(self.charging_station_sheet,
+                                            pixel_shader=self.charging_station_sheet.pixel_shader,
+                                            width=1,
+                                            height=1,
+                                            tile_width=55,
+                                            tile_height=42,
+                                            default_tile=0,
+                                            x=72,
+                                            y=70)
+
+
+        self.pointer_sheet = displayio.OnDiskBitmap("assets/Pointer-Spritesheet-2x.bmp")
+        self.pointer_sprite_1 = displayio.TileGrid(self.pointer_sheet,
+                                                width=1,
+                                                pixel_shader=self.pointer_sheet.pixel_shader,
+                                                height=1,
+                                                tile_width=14,
+                                                tile_height=12,
+                                                default_tile=0,
+                                                x=self.button_1_sprite.x + 16 // 2 - 14 // 2,
+                                                y=self.button_1_sprite.y - 9)
+        self.pointer_sprite_2 = displayio.TileGrid(self.pointer_sheet,
+                                                width=1,
+                                                pixel_shader=self.pointer_sheet.pixel_shader,
+                                                height=1,
+                                                tile_width=14,
+                                                tile_height=12,
+                                                default_tile=0,
+                                                x=self.button_2_sprite.x + 16 // 2 - 14 // 2,
+                                                y=self.button_2_sprite.y - 9)
+        self.pointer_sprite_3 = displayio.TileGrid(self.pointer_sheet,
+                                                width=1,
+                                                pixel_shader=self.pointer_sheet.pixel_shader,
+                                                height=1,
+                                                tile_width=14,
+                                                tile_height=12,
+                                                default_tile=0,
+                                                x=self.button_3_sprite.x + 16 // 2 - 14 // 2,
+                                                y=self.button_3_sprite.y - 9)
+
+        self.pointer_left_sheet = displayio.OnDiskBitmap("assets/Pointer-Left-Spritesheet-2x.bmp")
+        self.pointer_left_sprite = displayio.TileGrid(self.pointer_left_sheet,
+                                                width=1,
+                                                pixel_shader=self.pointer_sheet.pixel_shader,
+                                                height=1,
+                                                tile_width=14,
+                                                tile_height=12,
+                                                default_tile=0,
+                                                x=10,
+                                                y=10)
+
+        self.splash.append(self.pointer_sprite_1)
+        self.splash.append(self.pointer_sprite_2)
+        self.splash.append(self.pointer_sprite_3)
+
+        self.player_card_sheet = displayio.OnDiskBitmap("assets/Player-Card-Spritesheet.bmp")
+        self.player_card_sprite = displayio.TileGrid(self.player_card_sheet,
+                                            pixel_shader=self.player_card_sheet.pixel_shader,
+                                            width=1,
+                                            height=1,
+                                            tile_width=100,
+                                            tile_height=20,
+                                            default_tile=0,
+                                            x=14,
+                                            y=5)
+
+                                        
+
+
+        self.brick_sheet = displayio.OnDiskBitmap("assets/Breakout-Bricks-Spritesheet.bmp")
+        self.ball_sheet = displayio.OnDiskBitmap("assets/Breakout-Ball.bmp")
+
+        self.splash.append(self.hackamon_sprite_idle)
+
+        self.frame = 0
+        self.framePointer = 0
+        self.frameBackButton = 0
+        self.speed = 4
+        self.game_over = False
+        self.isJumping = False
+        self.facing_left = True
+        self.gameState = "Main"
+        self.happiness = 5000
+        self.battery = 5000
+        self.day_night = 5000
+        self.day = 0
+        self.level = 0
+        self.charging = False
+        self.chargingSprite = False
+        self.ball_delta_x = 1
+        self.ball_delta_y = 1
+        self.MAX_SPEED = 3  # Maximum ball speed
+        self.RANDOM_RANGE = 1  # Random range for offsetting ball direction
+
+
+
+        self.happiness_label = label.Label(
+            self.font,
+            text=str(self.happiness),
+            color=0x000000,  # Black color
+            anchor_point=(0.5, 0),
+            anchored_position=(self.happiness_bar_sprite.x + 28, self.happiness_bar_sprite.y + 2)
+        )
+
+        self.splash.append(self.happiness_label)
+
+        self.battery_label = label.Label(
+            self.font,
+            text=str(self.battery),
+            color=0x000000,  # Black color
+            anchor_point=(0.5, 0),
+            anchored_position=(self.battery_bar_sprite.x + 28, self.battery_bar_sprite.y + 2)
+        )
+
+        self.splash.append(self.battery_label)
+
+        self.level_label = label.Label(
+            self.font24px,
+            text="Level: " + str(self.level),
+            color=0xFFFFFF,
+            anchor_point=(0.5, 0.5),
+            anchored_position=(self.display.width // 2, self.display.height // 2)
+        )
+
+            # Bricks for breakout
+
+        self.brick_sprites = []
+        self.rows = 4
+        self.columns = 6
+
+        for row in range(self.rows):
+            for column in range(self.columns):
+                brick_sprite = displayio.TileGrid(self.brick_sheet,
+                                            pixel_shader=self.brick_sheet.pixel_shader,
+                                            width=1,
+                                            height=1,
+                                            tile_width=self.brick_width,
+                                            tile_height=self.brick_height,
+                                            default_tile=0,
+                                            x=column * self.brick_width + 11 + column * 2,
+                                            y=row * self.brick_height + 9 + row * 2)
+                brick_sprite[0] = column
+                self.brick_sprites.append(brick_sprite)
+
+        # Ball for breakout
+
+        self.ball_sprite = displayio.TileGrid(self.ball_sheet,
+                                        pixel_shader=self.ball_sheet.pixel_shader,
                                         width=1,
                                         height=1,
-                                        tile_width=100,
-                                        tile_height=20,
+                                        tile_width=6,
+                                        tile_height=6,
                                         default_tile=0,
-                                        x=14,
-                                        y=5)
-
-                                    
-
-
-    brick_sheet = displayio.OnDiskBitmap("assets/Breakout-Bricks-Spritesheet.bmp")
-    ball_sheet = displayio.OnDiskBitmap("assets/Breakout-Ball.bmp")
-
-    splash.append(hackamon_sprite_idle)
-
-    frame = 0
-    framePointer = 0
-    frameBackButton = 0
-    speed = 4
-    game_over = False
-    isJumping = False
-    facing_left = True
-    gameState = "Main"
-    happiness = 5000
-    battery = 5000
-    day_night = 5000
-    day = 0
-    level = 0
-    charging = False
-    chargingSprite = False
-    ball_delta_x = 1
-    ball_delta_y = 1
-    MAX_SPEED = 3  # Maximum ball speed
-    RANDOM_RANGE = 1  # Random range for offsetting ball direction
-
-
-
-    happiness_label = label.Label(
-        font,
-        text=str(happiness),
-        color=0x000000,  # Black color
-        anchor_point=(0.5, 0),
-        anchored_position=(happiness_bar_sprite.x + 28, happiness_bar_sprite.y + 2)
-    )
-
-    splash.append(happiness_label)
-
-    battery_label = label.Label(
-        font,
-        text=str(battery),
-        color=0x000000,  # Black color
-        anchor_point=(0.5, 0),
-        anchored_position=(battery_bar_sprite.x + 28, battery_bar_sprite.y + 2)
-    )
-
-    splash.append(battery_label)
-
-    level_label = label.Label(
-        font24px,
-        text="Level: " + str(level),
-        color=0xFFFFFF,
-        anchor_point=(0.5, 0.5),
-        anchored_position=(display.width // 2, display.height // 2)
-    )
+                                        x=(self.display.width - 6) // 2,
+                                        y=self.display.height // 2)
 
 
 
@@ -390,37 +432,7 @@ class Hackamon:
             self.chargingSprite = True
 
 
-    # Bricks for breakout
 
-    brick_sprites = []
-    rows = 4
-    columns = 6
-
-    for row in range(rows):
-        for column in range(columns):
-            brick_sprite = displayio.TileGrid(brick_sheet,
-                                        pixel_shader=brick_sheet.pixel_shader,
-                                        width=1,
-                                        height=1,
-                                        tile_width=brick_width,
-                                        tile_height=brick_height,
-                                        default_tile=0,
-                                        x=column * brick_width + 11 + column * 2,
-                                        y=row * brick_height + 9 + row * 2)
-            brick_sprite[0] = column
-            brick_sprites.append(brick_sprite)
-
-    # Ball for breakout
-
-    ball_sprite = displayio.TileGrid(ball_sheet,
-                                    pixel_shader=ball_sheet.pixel_shader,
-                                    width=1,
-                                    height=1,
-                                    tile_width=6,
-                                    tile_height=6,
-                                    default_tile=0,
-                                    x=(display.width - 6) // 2,
-                                    y=display.height // 2)
 
     def manage_stats(self):
         #global happiness, battery, game_over, charging, happiness_label, battery_label, level_label, day_night, day, level
@@ -798,6 +810,7 @@ class Hackamon:
     #async def main(self):
     def main(self):
         #global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -889,9 +902,14 @@ class Hackamon:
 
             self.hackamon_sprite_idle[0] = self.frame
             self.frame = (self.frame + 1) % (self.hackamon_sheet_idle.width // self.tile_width)
+            pygame.display.flip()
 
             time.sleep(0.1)
             #await asyncio.sleep(0)
 
     #asyncio.run(main())
 
+if __name__ == "__main__":
+    game = Hackamon
+    game.main(Hackamon)
+    print("starting main loop")
