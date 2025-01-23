@@ -270,6 +270,17 @@ player_card_sprite = displayio.TileGrid(player_card_sheet,
 brick_sheet = displayio.OnDiskBitmap("assets/Breakout-Bricks-Spritesheet.bmp")
 ball_sheet = displayio.OnDiskBitmap("assets/Breakout-Ball.bmp")
 
+dice_sheet = displayio.OnDiskBitmap("assets/Dice-Spritesheet.bmp")
+dice_sprite = displayio.TileGrid(dice_sheet,
+                                    pixel_shader=dice_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=42,
+                                    tile_height=42,
+                                    default_tile=0,
+                                    x=43,
+                                    y=43)
+
 #splash.append(hackamon_sprite_idle)
 
 frame = 0
@@ -285,6 +296,7 @@ battery = 5000
 day_night = 5000
 day = 0
 level = 0
+rolling = False
 charging = False
 chargingSprite = False
 ball_delta_x = 1
@@ -369,11 +381,13 @@ def handle_selection():
         print("Time")
     elif current_selection == 1:
         print("Dice Roll")
+        to_dice_roll()
     elif current_selection == 2:
         print("Coin Flip")
     elif current_selection == 3:
         print("Hackamon")
         to_main(gameState)
+        time.sleep(0.1)
 
 def run_jump_animation():
    global frame, isJumping
@@ -513,7 +527,7 @@ def manage_stats():
         #print("Battery: " + str(battery))
         battery_bar_sprite[0] = 4 - math.ceil(battery // 1000)
 
-    if gameState != "Breakout" and gameState != "Leaderboard" and gameState != "Menu":
+    if gameState != "Breakout" and gameState != "Leaderboard" and gameState != "Menu" and gameState != "Dice":
         splash.remove(happiness_label)
         splash.remove(battery_label)
 
@@ -653,6 +667,24 @@ def create_player_card(username, pet_level, x, y):
     splash.append(player_card_sprite)
     splash.append(username_label)
     splash.append(pet_level_label)
+
+# dice roll
+
+def roll_dice():
+    global rolling
+    for _ in range(2):  
+        for face in range(6):  
+            dice_sprite[0] = face 
+            time.sleep(0.1) 
+
+    # Stopping at a random face
+    random_face = random.randint(0, 5)  
+    dice_sprite[0] = random_face  
+
+    print(f"The dice landed on face: {random_face + 1}")  # Print the result
+    time.sleep(0.1)
+    rolling = False
+    
 
 # Functions to switch between game states
 
@@ -876,9 +908,105 @@ def to_main(prevGameState):
     hackamon_sprite_jump.x = (display.width - tile_width) // 2
     hackamon_sprite_jump.y = display.height - tile_height - 40
 
+def to_dice_roll():
+    global gameState, dice_roll_label, dice_title_label
+    gameState = "Dice"
+
+    for menu_box_sprite in menu_box_sprites:
+        menu_box_sprites.remove(menu_box_sprite)
+        splash.remove(menu_box_sprite)
+    for option_label in menu_box_options:
+        menu_box_options.remove(option_label)
+        splash.remove(option_label)
+    splash.remove(menu_bg_sprite)
+
+    splash.append(menu_bg_sprite)
+    splash.append(dice_sprite)
+    splash.append(pointer_sprite_3)
+    dice_title_label = label.Label(menu_font,
+            text="Dice-Roll",
+            color=0xFFFFFF,
+            anchor_point=(0.5, 0.5),
+            anchored_position=(display.width // 2, display.height // 6)
+        )
+    splash.append(dice_title_label)
+    dice_roll_label = label.Label(card_font,
+            text="Roll the dice!",
+            color=0xFFFFFF,
+            anchor_point=(0.5, 0.5),
+            anchored_position=(display.width // 2, display.height - display.height // 4.5)
+        )
+    splash.append(dice_roll_label)
+    pointer_sprite_3.x = 128 // 2 - 16 // 2
+    pointer_sprite_3.y = 128 - 128 // 7
+
+def to_menu(prevGameState):
+    global gameState, dice_roll_label, dice_title_label, menu_box_sprites, menu_box_options
+
+    gameState = "Menu"
+
+    # remove all from splash
+    if prevGameState == "Main":
+        splash.remove(hackamon_sprite_idle)
+        splash.remove(desk_bg_sprite)
+        splash.remove(button_1_sprite)
+        splash.remove(button_2_sprite)
+        splash.remove(button_3_sprite)
+        splash.remove(happiness_bar_sprite)
+        splash.remove(battery_bar_sprite)
+        splash.remove(day_night_cycle_bar_sprite)
+        splash.remove(pointer_sprite_1)
+        splash.remove(pointer_sprite_2)
+        splash.remove(pointer_sprite_3)
+    
+    if prevGameState == "Dice":
+        splash.remove(menu_bg_sprite)
+        splash.remove(dice_sprite)
+        splash.remove(pointer_sprite_3)
+        splash.remove(dice_roll_label)
+        splash.remove(dice_title_label)
+
+    
+    
+    # add to splash
+
+    splash.append(menu_bg_sprite)
+
+    menu_box_sprites = []
+    menu_box_options = []
+
+    for i, option in enumerate(menu_options):
+        x = 14
+        y = 5 + (i * 30)
+
+        menu_box_sprite = displayio.TileGrid(menu_box_sheet,
+                                                pixel_shader=menu_box_sheet.pixel_shader,
+                                                width=1,
+                                                height=1,
+                                                tile_width=100,
+                                                tile_height=25,
+                                                default_tile=option["unselected_tile"],
+                                                x=x,
+                                                y=y)
+        option_label = label.Label(
+            menu_font, text=option["text"], color=0x7a8af0, anchor_point=(0, 0), anchored_position=(x + 5, y + 7)
+        )
+
+        menu_box_sprites.append(menu_box_sprite)
+        menu_box_options.append(option_label)
+
+
+        splash.append(menu_box_sprite)
+        splash.append(option_label)
+    print(menu_box_sprites)
+
+    update_menu_selection()
+
+
+
 
 async def main():
-    global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite, current_selection
+    global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite, current_selection, rolling
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -912,6 +1040,8 @@ async def main():
                     hackamon_sprite_jump.x -= speed
                     hackamon_sprite_idle.flip_x = False
                     hackamon_sprite_jump.flip_x = False
+                if gameState == "Dice":
+                    to_menu(gameState)
 
             if keys[pygame.K_RIGHT]:
                 charging = False
@@ -928,6 +1058,8 @@ async def main():
                 if (gameState == "Main" and hackamon_sprite_idle.y > 64 - 20) or (gameState == "Station" and hackamon_sprite_idle.y > 96 - 20):
                     hackamon_sprite_idle.y -= speed
                     hackamon_sprite_jump.y -= speed
+                
+
                     
             if keys[pygame.K_DOWN]:
                 charging = False
@@ -938,8 +1070,7 @@ async def main():
             if keys[pygame.K_SPACE] and gameState == "Leaderboard":
                     time.sleep(0.5)
                     to_main(gameState)
-
-            elif keys[pygame.K_SPACE] and not isJumping and not charging:        
+            elif keys[pygame.K_SPACE] and not isJumping and not charging and gameState != "Menu" and gameState != "Dice":        
                 isJumping = True
                 splash.remove(hackamon_sprite_idle)
                 splash.append(hackamon_sprite_jump)
@@ -947,6 +1078,9 @@ async def main():
                 check_button_press()
                 if gameState == "Station":
                     charging_station()
+            elif keys[pygame.K_SPACE] and gameState == "Dice" and not rolling:
+                rolling = True
+                roll_dice()
 
             
             
@@ -960,8 +1094,9 @@ async def main():
 
             if gameState == "Breakout":
                 breakout()
-
-            manage_stats()
+            
+            if gameState != "Menu" and gameState != "Dice":
+                manage_stats()
 
             
 
