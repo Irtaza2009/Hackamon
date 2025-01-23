@@ -7,7 +7,7 @@ import pygame
 import time
 import math
 import random
-from Hackamon import Hackamon
+from old_Hackamon import Hackamon
 
 pygame.init()
 
@@ -112,3 +112,4 @@ def main():
 if __name__ == "__main__":
     update_menu_selection()  
     main()
+

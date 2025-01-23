@@ -22,6 +22,13 @@ leaderboard_data = [
     {"username": "Robo", "pet_level": 1}
 ]
 
+menu_options = [
+    {"text": "Time", "unselected_tile": 0, "selected_tile": 4},
+    {"text": "Dice Roll", "unselected_tile": 1, "selected_tile": 5},
+    {"text": "Coin Flip", "unselected_tile": 2, "selected_tile": 6},
+    {"text": "Hackamon", "unselected_tile": 3, "selected_tile": 7},
+]
+
 display = PyGameDisplay(width=128, height=128)
 splash = displayio.Group()
 display.show(splash)
@@ -29,16 +36,30 @@ display.show(splash)
 font = bitmap_font.load_font("fonts/PixelifySans-Regular.bdf")
 card_font = bitmap_font.load_font("fonts/PixelifySans-Regular-8px.bdf")
 font24px = bitmap_font.load_font("fonts/PixelifySans-Regular-24px.bdf")
+menu_font = bitmap_font.load_font("fonts/PixelifySans-Regular-12px.bdf")
 
 desk_background = displayio.OnDiskBitmap("assets/Desk-BG.bmp")
 desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
 station_background = displayio.OnDiskBitmap("assets/Station-BG.bmp")
 station_bg_sprite = displayio.TileGrid(station_background, pixel_shader=station_background.pixel_shader)
-breakout_background = displayio.OnDiskBitmap("Breakout-BG.bmp")
+breakout_background = displayio.OnDiskBitmap("assets/Breakout-BG.bmp")
 breakout_bg_sprite = displayio.TileGrid(breakout_background, pixel_shader=breakout_background.pixel_shader)
 leaderboard_background = displayio.OnDiskBitmap("assets/Leaderboard-BG.bmp")
 leaderboard_bg_sprite = displayio.TileGrid(leaderboard_background, pixel_shader=leaderboard_background.pixel_shader)
-splash.append(desk_bg_sprite)
+menu_bg_sheet = displayio.OnDiskBitmap("assets/Menu-BG.bmp")
+menu_bg_sprite = displayio.TileGrid(menu_bg_sheet, pixel_shader=menu_bg_sheet.pixel_shader)
+splash.append(menu_bg_sprite)
+
+menu_box_sheet = displayio.OnDiskBitmap("assets/Menu-Box-Spritesheet.bmp")
+menu_box_sprite = displayio.TileGrid(menu_box_sheet,
+                                    pixel_shader=menu_box_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=100,
+                                    tile_height=25,
+                                    default_tile=0,
+                                    x=14,
+                                    y=5)
 
 tile_width = 32
 tile_height = 32
@@ -139,7 +160,7 @@ happiness_bar_sprite = displayio.TileGrid(happiness_bar_sheet,
                                     x=5,
                                     y=8)
 
-splash.append(happiness_bar_sprite)
+#splash.append(happiness_bar_sprite)
 
 
 
@@ -155,7 +176,7 @@ battery_bar_sprite = displayio.TileGrid(battery_bar_sheet,
                                     x=5,
                                     y=20)
 
-splash.append(battery_bar_sprite)
+#splash.append(battery_bar_sprite)
 
 day_night_cycle_bar_sheet = displayio.OnDiskBitmap("assets/Day-Night-Bar-Spritesheet.bmp")
 day_night_cycle_bar_sprite = displayio.TileGrid(day_night_cycle_bar_sheet,
@@ -168,13 +189,13 @@ day_night_cycle_bar_sprite = displayio.TileGrid(day_night_cycle_bar_sheet,
                                     x=5,
                                     y=32)
 
-splash.append(day_night_cycle_bar_sprite)
+#splash.append(day_night_cycle_bar_sprite)
 
-splash.append(button_1_sprite)
+#splash.append(button_1_sprite)
 
-splash.append(button_2_sprite)
+#splash.append(button_2_sprite)
 
-splash.append(button_3_sprite)
+#splash.append(button_3_sprite)
 
 charging_station_sheet = displayio.OnDiskBitmap("assets/Charging-Station.bmp")
 charging_station_sprite = displayio.TileGrid(charging_station_sheet,
@@ -228,9 +249,9 @@ pointer_left_sprite = displayio.TileGrid(pointer_left_sheet,
                                         x=10,
                                         y=10)
 
-splash.append(pointer_sprite_1)
-splash.append(pointer_sprite_2)
-splash.append(pointer_sprite_3)
+#splash.append(pointer_sprite_1)
+#splash.append(pointer_sprite_2)
+#splash.append(pointer_sprite_3)
 
 player_card_sheet = displayio.OnDiskBitmap("assets/Player-Card-Spritesheet.bmp")
 player_card_sprite = displayio.TileGrid(player_card_sheet,
@@ -249,7 +270,7 @@ player_card_sprite = displayio.TileGrid(player_card_sheet,
 brick_sheet = displayio.OnDiskBitmap("assets/Breakout-Bricks-Spritesheet.bmp")
 ball_sheet = displayio.OnDiskBitmap("assets/Breakout-Ball.bmp")
 
-splash.append(hackamon_sprite_idle)
+#splash.append(hackamon_sprite_idle)
 
 frame = 0
 framePointer = 0
@@ -258,7 +279,7 @@ speed = 4
 game_over = False
 isJumping = False
 facing_left = True
-gameState = "Main"
+gameState = "Menu"
 happiness = 5000
 battery = 5000
 day_night = 5000
@@ -281,7 +302,7 @@ happiness_label = label.Label(
     anchored_position=(happiness_bar_sprite.x + 28, happiness_bar_sprite.y + 2)
 )
 
-splash.append(happiness_label)
+#splash.append(happiness_label)
 
 battery_label = label.Label(
     font,
@@ -291,7 +312,7 @@ battery_label = label.Label(
     anchored_position=(battery_bar_sprite.x + 28, battery_bar_sprite.y + 2)
 )
 
-splash.append(battery_label)
+#splash.append(battery_label)
 
 level_label = label.Label(
     font24px,
@@ -302,6 +323,57 @@ level_label = label.Label(
 )
 
 
+# menu
+menu_box_sprites = []
+menu_box_options = []
+current_selection = 0
+
+if gameState == "Menu":
+    for i, option in enumerate(menu_options):
+        x = 14
+        y = 5 + (i * 30)
+
+        menu_box_sprite = displayio.TileGrid(menu_box_sheet,
+                                                pixel_shader=menu_box_sheet.pixel_shader,
+                                                width=1,
+                                                height=1,
+                                                tile_width=100,
+                                                tile_height=25,
+                                                default_tile=option["unselected_tile"],
+                                                x=x,
+                                                y=y)
+        option_label = label.Label(
+            menu_font, text=option["text"], color=0x7a8af0, anchor_point=(0, 0), anchored_position=(x + 5, y + 7)
+        )
+
+        menu_box_sprites.append(menu_box_sprite)
+        menu_box_options.append(option_label)
+
+
+        splash.append(menu_box_sprite)
+        splash.append(option_label)
+
+def update_menu_selection():
+
+    for i, menu_box in enumerate(menu_box_sprites):
+        if i == current_selection:
+            menu_box[0] = menu_options[i]["selected_tile"]
+        else:
+            menu_box[0] = menu_options[i]["unselected_tile"]
+
+update_menu_selection()
+
+def handle_selection():
+    global gameState
+    if current_selection == 0:
+        print("Time")
+    elif current_selection == 1:
+        print("Dice Roll")
+    elif current_selection == 2:
+        print("Coin Flip")
+    elif current_selection == 3:
+        print("Hackamon")
+        to_main(gameState)
 
 def run_jump_animation():
    global frame, isJumping
@@ -441,7 +513,7 @@ def manage_stats():
         #print("Battery: " + str(battery))
         battery_bar_sprite[0] = 4 - math.ceil(battery // 1000)
 
-    if gameState != "Breakout" and gameState != "Leaderboard":
+    if gameState != "Breakout" and gameState != "Leaderboard" and gameState != "Menu":
         splash.remove(happiness_label)
         splash.remove(battery_label)
 
@@ -732,7 +804,20 @@ def to_main(prevGameState):
         pointer_sprite_2.flip_y = False
         splash.remove(pointer_sprite_2)
         splash.remove(pointer_left_sprite)
+
+    elif prevGameState == "Menu":
+        for menu_box_sprite in menu_box_sprites:
+            menu_box_sprites.remove(menu_box_sprite)
+            splash.remove(menu_box_sprite)
+        for option_label in menu_box_options:
+            menu_box_options.remove(option_label)
+            splash.remove(option_label)
+        splash.remove(menu_bg_sprite)
+        splash.append(happiness_label)
+        splash.append(battery_label)
+        
     else:
+
 
         # if from breakout
         if prevGameState == "Breakout":
@@ -793,12 +878,24 @@ def to_main(prevGameState):
 
 
 async def main():
-    global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite
+    global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite, current_selection
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            elif event.type == pygame.KEYDOWN and gameState == "Menu":
+                if event.key == pygame.K_LEFT:
+                    current_selection = (current_selection + 1) % len(menu_options)
+                    update_menu_selection()
+
+                if event.key == pygame.K_RIGHT:
+                    current_selection = (current_selection - 1) % len(menu_options)
+                    update_menu_selection()
+
+                if event.key == pygame.K_SPACE:
+                    handle_selection()
+
         if display.check_quit():
             break
 
