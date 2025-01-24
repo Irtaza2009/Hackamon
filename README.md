@@ -13,6 +13,18 @@ _Built to run on a ESP32-S2 Mini2 powered custom tamagotchi!_
 
 [here](https://cloud-jrgb41ndb-hack-club-bot.vercel.app/0screen_recording_2025-01-20_at_6.06.50_pm.mp4)
 
+_Flip a Coin_
+
+![Flip a Coin](https://cloud-1erh0yg7y-hack-club-bot.vercel.app/0screenrecording2025-01-24at1.16.42am-ezgif.com-video-to-gif-converter.gif)
+
+_Roll a Dice_
+
+![Roll a Dice](https://cloud-55rzzph2x-hack-club-bot.vercel.app/1dice-roll_hackamon.gif)
+
+_Stopwatch_
+
+![Stopwatch](https://cloud-55rzzph2x-hack-club-bot.vercel.app/0stopwatch_hackamon.gif)
+
 _Breakout Minigame_
 
 ![Breaout Scene](https://cloud-d838srl6u-hack-club-bot.vercel.app/3hackamon_demo_breakout.gif)
@@ -30,6 +42,7 @@ _Leaderboard_
 ## 🎮 **Current Game Features**
 
 - **Custom Pixel Art Sprites**: _All of the pixel art sprites have been **drawn by me**! My first venture in pixel art!!!_
+- **Menu Screen**: _Roll a dice_? _Flip a coin_? Or maybe _start a Stopwatch_? _Choose from the menu_ what you want to do!
 - **Main Home Scene**: Central hub for all your Hackamon's activities.
 - **Charging Station Scene**: Keep your Hackamon powered up and ready for action.
 - **Breakout Scene**: A mini-game to play with your Hackamon.

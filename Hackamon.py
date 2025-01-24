@@ -38,9 +38,9 @@ font = bitmap_font.load_font("fonts/PixelifySans-Regular.bdf")
 #font24px = bitmap_font.load_font("fonts/PixelifySans-Regular-24px.bdf")
 #font12px = bitmap_font.load_font("fonts/PixelifySans-Regular-12px.bdf")
 font8px = bitmap_font.load_font("fonts/pixelade-8px.bdf")
-font24px = bitmap_font.load_font("fonts/pixelade-24px.bdf")
 font12px = bitmap_font.load_font("fonts/pixelade-12px.bdf")
-
+font18px = bitmap_font.load_font("fonts/pixelade-18px.bdf")
+font24px = bitmap_font.load_font("fonts/pixelade-24px.bdf")
 
 desk_background = displayio.OnDiskBitmap("assets/Desk-BG.bmp")
 desk_bg_sprite = displayio.TileGrid(desk_background, pixel_shader=desk_background.pixel_shader)
@@ -296,6 +296,18 @@ coin_sprite = displayio.TileGrid(coin_sheet,
                                     x=43,
                                     y=43)
 
+stopwatch_sheet = displayio.OnDiskBitmap("assets/Stopwatch.bmp")
+stopwatch_sprite = displayio.TileGrid(stopwatch_sheet,
+                                    pixel_shader=stopwatch_sheet.pixel_shader,
+                                    width=1,
+                                    height=1,
+                                    tile_width=105,
+                                    tile_height=33,
+                                    default_tile=0,
+                                    x=11,
+                                    y=48)
+
+
 #splash.append(hackamon_sprite_idle)
 
 frame = 0
@@ -314,6 +326,7 @@ level = 0
 rolling = False
 flipping = False
 charging = False
+ticking = False
 chargingSprite = False
 ball_delta_x = 1
 ball_delta_y = 1
@@ -394,7 +407,9 @@ update_menu_selection()
 def handle_selection():
     global gameState
     if current_selection == 0:
-        print("Time")
+        print("Stopwatch")
+        to_stopwatch()
+        time.sleep(0.1)
     elif current_selection == 1:
         print("Dice Roll")
         to_dice_roll()
@@ -546,7 +561,7 @@ def manage_stats():
         #print("Battery: " + str(battery))
         battery_bar_sprite[0] = 4 - math.ceil(battery // 1000)
 
-    if gameState != "Breakout" and gameState != "Leaderboard" and gameState != "Menu" and gameState != "Dice" and gameState != "Coin":
+    if gameState != "Breakout" and gameState != "Leaderboard" and gameState != "Menu" and gameState != "Dice" and gameState != "Coin" and gameState != "Stopwatch":
         splash.remove(happiness_label)
         splash.remove(battery_label)
 
@@ -719,6 +734,65 @@ def flip_coin():
     print("The coin landed on: ", 'Heads' if random_face == 0 else 'Tails')  # Print the result
     time.sleep(0.1)
     flipping = False
+
+# stopwatch
+
+def start_stopwatch():
+    global ticking, stopwatch_display, keys, time_elapsed_s, time_elapsed_m, time_elapsed_h, stopwatch_start_label
+    time_elapsed_s = 0
+    time_elapsed_m = 0
+    time_elapsed_h = 0
+    splash.remove(stopwatch_start_label)
+    stopwatch_start_label = label.Label(font12px,
+            text="Press to stop!",
+            color=0xFFFFFF,
+            anchor_point=(0.5, 0.5),
+            anchored_position=(display.width // 2, display.height - display.height // 4.5)
+        )
+    splash.append(stopwatch_start_label)
+
+    while ticking:
+        time.sleep(1)
+        time_elapsed_s += 1
+        if time_elapsed_s == 60:
+            time_elapsed_s = 0
+            time_elapsed_m += 1
+        if time_elapsed_m == 60:
+            time_elapsed_m = 0
+            time_elapsed_h += 1
+        
+        splash.remove(stopwatch_display)
+        stopwatch_display = label.Label(
+        font18px,
+        text=f"{time_elapsed_h:02}:{time_elapsed_m:02}:{time_elapsed_s:02}",
+        color=0xFFFFFF,
+        anchor_point=(0.5, 0.5),
+        anchored_position=(display.width // 2, display.height // 2)
+        )
+        splash.append(stopwatch_display)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                ticking = False
+                splash.remove(stopwatch_start_label)
+                stopwatch_start_label = label.Label(font12px,
+                    text="Press to start!",
+                    color=0xFFFFFF,
+                    anchor_point=(0.5, 0.5),
+                    anchored_position=(display.width // 2, display.height - display.height // 4.5)
+                )
+                splash.append(stopwatch_start_label)
+                break
+
+
+        if display.check_quit():
+            break
+        
+        
+        
     
 
 # Functions to switch between game states
@@ -1007,6 +1081,56 @@ def to_coin_flip():
     pointer_sprite_3.x = 128 // 2 - 16 // 2
     pointer_sprite_3.y = 128 - 128 // 7
 
+def to_stopwatch():
+    global gameState, stopwatch_title_label, stopwatch_start_label, stopwatch_display, time_elapsed_s, time_elapsed_m, time_elapsed_h
+    gameState = "Stopwatch"
+    # remove all from splash
+
+    for menu_box_sprite in menu_box_sprites:
+        menu_box_sprites.remove(menu_box_sprite)
+        splash.remove(menu_box_sprite)
+    for option_label in menu_box_options:
+        menu_box_options.remove(option_label)
+        splash.remove(option_label)
+    splash.remove(menu_bg_sprite)
+
+    # add stopwatch background and sprites
+    splash.append(menu_bg_sprite)
+    splash.append(stopwatch_sprite)
+    splash.append(pointer_sprite_3)
+    stopwatch_title_label = label.Label(font24px,
+            text="Stopwatch",
+            color=0xFFFFFF,
+            anchor_point=(0.5, 0.5),
+            anchored_position=(display.width // 2, display.height // 6)
+        )
+    stopwatch_start_label = label.Label(font12px,
+            text="Press to start!",
+            color=0xFFFFFF,
+            anchor_point=(0.5, 0.5),
+            anchored_position=(display.width // 2, display.height - display.height // 4.5)
+        )
+
+    splash.append(stopwatch_title_label)
+    splash.append(stopwatch_start_label)
+
+    time_elapsed_s = 0
+    time_elapsed_m = 0
+    time_elapsed_h = 0
+
+    stopwatch_display = label.Label(
+        font18px,
+        text=f"{time_elapsed_h:02}:{time_elapsed_m:02}:{time_elapsed_s:02}",
+        color=0xFFFFFF,
+        anchor_point=(0.5, 0.5),
+        anchored_position=(display.width // 2, display.height // 2)
+        )
+    splash.append(stopwatch_display)
+
+    pointer_sprite_3.x = 128 // 2 - 16 // 2
+    pointer_sprite_3.y = 128 - 128 // 7
+
+
 def to_menu(prevGameState):
     global gameState, dice_roll_label, dice_title_label, menu_box_sprites, menu_box_options, coin_flip_label, coin_title_label
 
@@ -1080,7 +1204,7 @@ def to_menu(prevGameState):
 
 
 async def main():
-    global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite, current_selection, rolling, flipping
+    global frame, framePointer, frameBackButton, isJumping, facing_left, gameState, charging, chargingSprite, current_selection, rolling, flipping, ticking, keys
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1114,7 +1238,7 @@ async def main():
                     hackamon_sprite_jump.x -= speed
                     hackamon_sprite_idle.flip_x = False
                     hackamon_sprite_jump.flip_x = False
-                if gameState == "Dice" or gameState == "Coin":
+                if gameState == "Dice" or gameState == "Coin" or gameState == "Stopwatch":
                     to_menu(gameState)
 
             if keys[pygame.K_RIGHT]:
@@ -1144,7 +1268,7 @@ async def main():
             if keys[pygame.K_SPACE] and gameState == "Leaderboard":
                     time.sleep(0.5)
                     to_main(gameState)
-            elif keys[pygame.K_SPACE] and not isJumping and not charging and gameState != "Menu" and gameState != "Dice" and gameState != "Coin":        
+            elif keys[pygame.K_SPACE] and not isJumping and not charging and gameState != "Menu" and gameState != "Dice" and gameState != "Coin" and gameState != "Stopwatch":        
                 isJumping = True
                 splash.remove(hackamon_sprite_idle)
                 splash.append(hackamon_sprite_jump)
@@ -1158,6 +1282,11 @@ async def main():
             elif keys[pygame.K_SPACE] and gameState == "Coin" and not flipping:
                 flipping = True
                 flip_coin()
+            elif keys[pygame.K_SPACE] and gameState == "Stopwatch" and not ticking:
+                ticking = True
+                start_stopwatch()
+                
+
 
             
             
@@ -1172,7 +1301,7 @@ async def main():
             if gameState == "Breakout":
                 breakout()
             
-            if gameState != "Menu" and gameState != "Dice" and gameState != "Coin":
+            if gameState != "Menu" and gameState != "Dice" and gameState != "Coin" and gameState != "Stopwatch":
                 manage_stats()
 
             
