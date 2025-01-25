@@ -1,5 +1,5 @@
-happiness=4731
-battery=4731
-day_night=4540
-day=1
-level=1
+happiness=4570
+battery=4406
+day_night=2240
+day=2
+level=2

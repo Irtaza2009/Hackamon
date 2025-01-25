@@ -9,9 +9,7 @@ Take care of your Hackamon, charge it, play games and battle your way to the top
 
 _Built to run on a ESP32-S2 Mini2 powered custom tamagotchi!_
 
-![Short Demo of full game](https://cloud-jrgb41ndb-hack-club-bot.vercel.app/0screen_recording_2025-01-20_at_6.06.50_pm.mp4)
-
-[here](https://cloud-jrgb41ndb-hack-club-bot.vercel.app/0screen_recording_2025-01-20_at_6.06.50_pm.mp4)
+![Short Demo of full game](https://cloud-ny2cxzjoa-hack-club-bot.vercel.app/0hackamon_demo.mp4)
 
 _Flip a Coin_
 
@@ -43,6 +41,8 @@ _Leaderboard_
 
 - **Custom Pixel Art Sprites**: _All of the pixel art sprites have been **drawn by me**! My first venture in pixel art!!!_
 - **Menu Screen**: _Roll a dice_? _Flip a coin_? Or maybe _start a Stopwatch_? _Choose from the menu_ what you want to do!
+- **Roll a dice**: Use it as a keychain and bring it out for utility features like this!
+- **Flip a Coin**: Can't make a decision? Let your Hackamon decide!
 - **Main Home Scene**: Central hub for all your Hackamon's activities.
 - **Charging Station Scene**: Keep your Hackamon powered up and ready for action.
 - **Breakout Scene**: A mini-game to play with your Hackamon.
@@ -53,6 +53,7 @@ _Leaderboard_
   - Use **Left** and **Right** arrow keys for movement.
   - Press the **Space Bar** for selections.
 - **Online Leaderboard**: Aim for the top!
+- **Game Save File**: Your progress won't be lost, even if you turn off the device!
 - **Interactive Buttons** with animations and feedback.
 - **Visual Animated Pointers** to guide you through button selections.
 - **Dynamic Happiness Bar**: Reflects your Hackamon's mood with multiple sprites.
