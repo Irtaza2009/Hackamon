@@ -8,10 +8,19 @@ import asyncio
 import time
 import math
 import random
+import os
 
 pygame.init()
 
+stats_file = "stats.txt"
 
+default_stats = {
+    "happiness": 5000,
+    "battery": 5000,
+    "day_night": 5000,
+    "day": 0,
+    "level": 0
+}
 
 # test leaderboard data
 leaderboard_data = [
@@ -310,6 +319,28 @@ stopwatch_sprite = displayio.TileGrid(stopwatch_sheet,
 
 #splash.append(hackamon_sprite_idle)
 
+# read stats from file
+
+def read_stats():
+    
+    if os.path.exists(stats_file):
+        with open(stats_file, "r") as file:
+            lines = file.readlines()
+            stats = {}
+            for line in lines:
+                key, value = line.strip().split("=")
+                stats[key] = int(value)
+            return stats
+    return default_stats.copy()
+
+# write stats to file
+
+def write_stats(stats):
+    with open(stats_file, "w") as file:
+        for key, value in stats.items():
+            file.write(f"{key}={value}\n")
+
+
 frame = 0
 framePointer = 0
 frameBackButton = 0
@@ -318,11 +349,14 @@ game_over = False
 isJumping = False
 facing_left = True
 gameState = "Menu"
-happiness = 5000
-battery = 5000
-day_night = 5000
-day = 0
-level = 0
+
+# load stats
+stats = read_stats()
+happiness = stats["happiness"]
+battery = stats["battery"]
+day_night = stats["day_night"]
+day = stats["day"]
+level = stats["level"]
 rolling = False
 flipping = False
 charging = False
@@ -613,6 +647,16 @@ def manage_stats():
         day_night -= 20
 
         day_night_cycle_bar_sprite[0] = 4 - math.ceil(day_night // 1000)
+
+    # save stats
+    updated_stats = {
+        "happiness": happiness,
+        "battery": battery,
+        "day_night": day_night,
+        "day": day,
+        "level": level
+    }
+    write_stats(updated_stats)
 
         
 def breakout():
