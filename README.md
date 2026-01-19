@@ -1,6 +1,6 @@
 # Hackamon
 
-![Hackamon Logo](https://cloud-7adfvs3rn-hack-club-bot.vercel.app/0hackamon__1_.png)
+![Hackamon Logo](https://hc-cdn.hel1.your-objectstorage.com/s/v3/f6272a9aecc9ee75_hackamon__1_.png)
 _A virtual pet game submitted for the **Hackapet YSWS** by **Hack Club**_
 
 Take care of your Hackamon, charge it, play games and battle your way to the top of the leaderboard! Upgrade your Hackamon to make it stronger and ensure its happiness and energy are always at their best.
@@ -9,31 +9,33 @@ Take care of your Hackamon, charge it, play games and battle your way to the top
 
 _Built to run on a ESP32-S2 Mini2 powered custom tamagotchi!_
 
-![Short Demo of full game](https://cloud-ny2cxzjoa-hack-club-bot.vercel.app/0hackamon_demo.mp4)
+[Short Demo of full game](https://github.com/user-attachments/assets/ebe0abde-8a37-4cd3-8de3-1c2a4ef7e3ae)
+
+[Demo on Sprig](https://github.com/user-attachments/assets/ddefeffc-b300-45f1-a2a0-a1f898696762)
 
 _Flip a Coin_
 
-![Flip a Coin](https://cloud-1erh0yg7y-hack-club-bot.vercel.app/0screenrecording2025-01-24at1.16.42am-ezgif.com-video-to-gif-converter.gif)
+![Flip a Coin](https://hc-cdn.hel1.your-objectstorage.com/s/v3/eb21f9a1fbdbdc0d_screenrecording2025-01-24at1.16.42am-ezgif.com-video-to-gif-converter.gif)
 
 _Roll a Dice_
 
-![Roll a Dice](https://cloud-55rzzph2x-hack-club-bot.vercel.app/1dice-roll_hackamon.gif)
+![Roll a Dice](https://hc-cdn.hel1.your-objectstorage.com/s/v3/4eb2f13fba658c1b_dice-roll_hackamon.gif)
 
 _Stopwatch_
 
-![Stopwatch](https://cloud-55rzzph2x-hack-club-bot.vercel.app/0stopwatch_hackamon.gif)
+![Stopwatch](https://hc-cdn.hel1.your-objectstorage.com/s/v3/0f1aef23ef97b7a9_stopwatch_hackamon.gif)
 
 _Breakout Minigame_
 
-![Breaout Scene](https://cloud-d838srl6u-hack-club-bot.vercel.app/3hackamon_demo_breakout.gif)
+![Breaout Scene](https://hc-cdn.hel1.your-objectstorage.com/s/v3/65c6fd8a02db8c6b_hackamon_demo_breakout.gif)
 
 _Charging Station_
 
-![Charging Scene](https://cloud-d838srl6u-hack-club-bot.vercel.app/2hackamon_demo_charging_station.gif)
+![Charging Scene](https://hc-cdn.hel1.your-objectstorage.com/s/v3/b0cd9959eae747cf_hackamon_demo_charging_station.gif)
 
 _Leaderboard_
 
-![Leaderboard](https://cloud-d838srl6u-hack-club-bot.vercel.app/1hackamon_demo_leaderboard.gif)
+![Leaderboard](https://hc-cdn.hel1.your-objectstorage.com/s/v3/20fdb57b8dce865e_hackamon_demo_leaderboard.gif)
 
 **_All of these pixel art sprites have been drawn by me!!!_**
 
