@@ -1,6 +1,7 @@
 # Hackamon
 
-![Hackamon Logo](https://hc-cdn.hel1.your-objectstorage.com/s/v3/f6272a9aecc9ee75_hackamon__1_.png)
+<img width="775" height="337" alt="Hackamon (4)" src="https://github.com/user-attachments/assets/b0f0d2ba-ce73-48d7-b362-50acab1d38a9" />
+
 _A virtual pet game submitted for the **Hackapet YSWS** by **Hack Club**_
 
 Take care of your Hackamon, charge it, play games and battle your way to the top of the leaderboard! Upgrade your Hackamon to make it stronger and ensure its happiness and energy are always at their best.
