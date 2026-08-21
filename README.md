@@ -14,6 +14,7 @@ _Built to run on a ESP32-S2 Mini2 powered custom tamagotchi!_
 
 [Demo on Sprig](https://github.com/user-attachments/assets/ddefeffc-b300-45f1-a2a0-a1f898696762)
 
+<!--
 _Flip a Coin_
 
 ![Flip a Coin](https://hc-cdn.hel1.your-objectstorage.com/s/v3/eb21f9a1fbdbdc0d_screenrecording2025-01-24at1.16.42am-ezgif.com-video-to-gif-converter.gif)
@@ -37,6 +38,8 @@ _Charging Station_
 _Leaderboard_
 
 ![Leaderboard](https://hc-cdn.hel1.your-objectstorage.com/s/v3/20fdb57b8dce865e_hackamon_demo_leaderboard.gif)
+
+-->
 
 **_All of these pixel art sprites have been drawn by me!!!_**
 
